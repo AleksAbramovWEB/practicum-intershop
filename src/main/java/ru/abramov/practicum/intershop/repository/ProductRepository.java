@@ -10,6 +10,4 @@ import org.springframework.data.domain.Pageable;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findByTitleContainingIgnoreCase(String title, Pageable pageable);
-
-    Product findAllById(Long id);
 }
