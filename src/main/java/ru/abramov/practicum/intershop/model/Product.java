@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,4 +39,7 @@ public class Product {
     public Integer getCount() {
         return carts.size();
     }
+
+    @Transient
+    private MultipartFile image;
 }

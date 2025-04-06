@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.ProductRepository;
+import ru.abramov.practicum.intershop.service.ImageService;
 import ru.abramov.practicum.intershop.service.ProductService;
 
 @Component
@@ -15,6 +16,8 @@ import ru.abramov.practicum.intershop.service.ProductService;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+
+    private final ImageService imageService;
 
     public Page<Product> getProducts(String search, String sort, int page, int size) {
         Pageable pageable = switch (sort) {
@@ -28,5 +31,15 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return productRepository.findAll(pageable);
+    }
+
+    @Override
+    public void addProduct(Product product) {
+        String imagePath = imageService.save(product.getImage())
+                .orElseThrow(() -> new IllegalArgumentException("Image is required"));
+
+        product.setImgPath(imagePath);
+
+        productRepository.save(product);
     }
 }
