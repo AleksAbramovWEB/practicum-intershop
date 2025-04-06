@@ -40,3 +40,12 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.bootJar {
+    archiveFileName = "app.jar"
+    mainClass = "ru.abramov.practicum.intershop.PracticumIntershopApplication"
+}
+
+tasks.bootRun {
+    mainClass = "ru.abramov.practicum.intershop.PracticumIntershopApplication"
+}
