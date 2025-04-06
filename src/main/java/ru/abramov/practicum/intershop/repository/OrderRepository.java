@@ -6,4 +6,6 @@ import ru.abramov.practicum.intershop.model.Order;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+
+    Order findTopByOrderByIdDesc();
 }

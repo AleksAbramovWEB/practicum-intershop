@@ -1,8 +1,10 @@
 package ru.abramov.practicum.intershop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Data
+@ToString(exclude = "carts")
 public class Product {
 
     @Id
@@ -25,8 +28,6 @@ public class Product {
     @NotNull
     private BigDecimal price;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @NotNull

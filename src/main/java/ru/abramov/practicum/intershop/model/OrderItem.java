@@ -3,11 +3,13 @@ package ru.abramov.practicum.intershop.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Entity
 @Data
+@ToString(exclude = {"product", "order"})
 public class OrderItem {
 
     @Id
