@@ -5,13 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.ProductRepository;
 import ru.abramov.practicum.intershop.service.ImageService;
 import ru.abramov.practicum.intershop.service.ProductService;
 
-@Component
+@Service
 @AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 

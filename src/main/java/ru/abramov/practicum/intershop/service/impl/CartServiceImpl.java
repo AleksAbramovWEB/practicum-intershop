@@ -1,7 +1,7 @@
 package ru.abramov.practicum.intershop.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Product;
@@ -11,7 +11,7 @@ import ru.abramov.practicum.intershop.service.ProductService;
 
 import java.util.List;
 
-@Component
+@Service
 @AllArgsConstructor
 public class CartServiceImpl implements CartService {
 
