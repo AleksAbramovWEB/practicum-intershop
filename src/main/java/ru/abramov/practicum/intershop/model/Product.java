@@ -1,25 +1,22 @@
 package ru.abramov.practicum.intershop.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.ToString;
-import org.hibernate.validator.constraints.Length;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.annotation.Transient;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
 @Data
-@ToString(exclude = "carts")
+@Table("product")
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_id_seq")
-    @SequenceGenerator(name = "product_id_seq", sequenceName = "product_id_seq", allocationSize = 1)
     private Long id;
 
     @NotNull
@@ -32,14 +29,11 @@ public class Product {
 
     @NotNull
     @Length(max = 2000)
+    @Column("img_path")
     private String imgPath;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
-    private List<Cart> carts = new ArrayList<>();
-
-    public Integer getCount() {
-        return carts.size();
-    }
+    @ReadOnlyProperty
+    private Integer count = 0;
 
     @Transient
     private MultipartFile image;

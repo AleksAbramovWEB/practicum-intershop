@@ -1,26 +1,21 @@
 package ru.abramov.practicum.intershop.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
 @Data
-@Table(name = "orders")
+@Table("orders")
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orders_id_seq")
-    @SequenceGenerator(name = "orders_id_seq", sequenceName = "orders_id_seq", allocationSize = 1)
     private Long id;
 
     @NotNull
+    @Column("total_sum")
     private BigDecimal totalSum;
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems = new ArrayList<>();
 }

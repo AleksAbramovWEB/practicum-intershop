@@ -3,6 +3,7 @@ package ru.abramov.practicum.intershop.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.CartRepository;
@@ -21,12 +22,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public List<Product> getProductsInCart() {
+    public Flux<Product> getProductsInCart() {
         return cartRepository.findAll()
-                .stream()
-                .map(Cart::getProduct)
-                .distinct()
-                .toList();
     }
 
     @Override

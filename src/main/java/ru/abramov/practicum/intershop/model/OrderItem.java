@@ -1,33 +1,30 @@
 package ru.abramov.practicum.intershop.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.ToString;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-@Entity
 @Data
-@ToString(exclude = {"product", "order"})
+@Table("order_item")
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_item_id_seq")
-    @SequenceGenerator(name = "order_item_id_seq", sequenceName = "order_item_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_order_item__product"))
-    private Product product;
+    @Column("product_id")
+    private Long productId;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(foreignKey = @ForeignKey(name = "fk_order_item__orders"))
-    private Order order;
+    @Column("order_id")
+    private Long orderId;
 
     @NotNull
     private Integer count;
 
     @NotNull
+    @Column("total_sum")
     private BigDecimal totalSum;
 }
