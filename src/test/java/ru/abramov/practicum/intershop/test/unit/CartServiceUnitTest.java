@@ -6,21 +6,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.CartRepository;
+import ru.abramov.practicum.intershop.repository.ProductRepository;
 import ru.abramov.practicum.intershop.service.CartService;
 import ru.abramov.practicum.intershop.service.ProductService;
 import ru.abramov.practicum.intershop.service.impl.CartServiceImpl;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringJUnitConfig(classes = CartServiceUnitTest.Config.class)
 class CartServiceUnitTest {
+
+    private final Long productId = 1L;
+
+    private Product product;
 
     @Autowired
     private CartService cartService;
@@ -31,73 +37,78 @@ class CartServiceUnitTest {
     @Autowired
     private ProductService productService;
 
-    private Product product;
+    @Autowired
+    private ProductRepository productRepository;
 
     @BeforeEach
     void setUp() {
         product = new Product();
-        product.setId(1L);
+        product.setId(productId);
         product.setTitle("Test Product");
         product.setPrice(new BigDecimal("100.00"));
-        product.setImgPath("path/to/image");
+        product.setImgPath("img.jpg");
 
-        when(productService.getProduct(1L)).thenReturn(product);
+        when(productService.getProduct(productId)).thenReturn(Mono.just(product));
     }
 
     @Test
-    void getProductsInCart_ShouldReturnListOfDistinctProducts() {
-        Cart cart1 = new Cart();
-        cart1.setProduct(product);
+    void getProductsInCart_ShouldReturnFluxOfProducts() {
+        when(productRepository.findAllInCart()).thenReturn(Flux.just(product));
 
-        Cart cart2 = new Cart();
-        cart2.setProduct(product);
+        StepVerifier.create(cartService.getProductsInCart())
+                .expectNext(product)
+                .verifyComplete();
 
-        when(cartRepository.findAll()).thenReturn(List.of(cart1, cart2));
-
-        List<Product> result = cartService.getProductsInCart();
-
-        assertEquals(1, result.size());  // Ожидаем 1 уникальный продукт
-        verify(cartRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAllInCart();
     }
 
     @Test
-    void minus_ShouldDeleteProductFromCart() {
+    void minus_ShouldDeleteOneCartItem() {
         Cart cart = new Cart();
-        cart.setProduct(product);
-        when(cartRepository.findAllByProduct(product)).thenReturn(List.of(cart));
+        cart.setId(42L);
+        cart.setProductId(productId);
 
-        cartService.minus(1L);
+        when(cartRepository.findAllByProductId(productId)).thenReturn(Flux.just(cart));
+        when(cartRepository.delete(cart)).thenReturn(Mono.empty());
 
-        verify(cartRepository, times(1)).delete(cart);
+        StepVerifier.create(cartService.minus(productId))
+                .verifyComplete();
+
+        verify(cartRepository).delete(cart);
     }
 
     @Test
-    void plus_ShouldSaveProductToCart() {
-        Cart cart = new Cart();
-        cart.setProduct(product);
+    void plus_ShouldSaveCartItem() {
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.empty());
 
-        cartService.plus(1L);
+        StepVerifier.create(cartService.plus(productId))
+                .verifyComplete();
 
         verify(cartRepository, times(1)).save(any(Cart.class));
     }
 
     @Test
-    void delete_ShouldDeleteAllCartsWithProduct() {
-        Cart cart = new Cart();
-        cart.setProduct(product);
-        when(cartRepository.findAllByProduct(product)).thenReturn(List.of(cart));
+    void delete_ShouldRemoveAllCartItemsForProduct() {
+        Cart cart1 = new Cart();
+        cart1.setProductId(productId);
 
-        cartService.delete(1L);
+        Cart cart2 = new Cart();
+        cart2.setProductId(productId);
 
-        verify(cartRepository, times(1)).deleteAllByProduct(product);
+        when(cartRepository.findAllByProductId(productId)).thenReturn(Flux.just(cart1, cart2));
+        when(cartRepository.delete(any())).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.delete(productId))
+                .verifyComplete();
+
+        verify(cartRepository, times(2)).delete(any());
     }
 
     @Configuration
     static class Config {
-
         @Bean
-        public CartService cartService(CartRepository cartRepository, ProductService productService) {
-            return new CartServiceImpl(productService, cartRepository);
+        public CartService cartService(ProductService productService, CartRepository cartRepository, ProductRepository productRepository) {
+            return new CartServiceImpl(productService, cartRepository, productRepository);
         }
 
         @Bean
@@ -108,6 +119,11 @@ class CartServiceUnitTest {
         @Bean
         public ProductService productService() {
             return mock(ProductService.class);
+        }
+
+        @Bean
+        public ProductRepository productRepository() {
+            return mock(ProductRepository.class);
         }
     }
 }

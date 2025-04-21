@@ -1,21 +1,25 @@
 package ru.abramov.practicum.intershop.test.integration;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.AutoConfigureDataR2dbc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureWebTestClient
 @ActiveProfiles("test")
+@AutoConfigureDataR2dbc
 abstract public class AbstractIntegrationTest {
 
     @Autowired
-    protected MockMvc mockMvc;
+    protected WebTestClient webTestClient;
 
     @Autowired
-    protected JdbcTemplate jdbcTemplate;
+    protected DatabaseClient databaseClient;
 }

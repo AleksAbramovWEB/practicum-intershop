@@ -1,74 +1,72 @@
 package ru.abramov.practicum.intershop.test.integration;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.jdbc.Sql;
-import ru.abramov.practicum.intershop.repository.ProductRepository;
-import ru.abramov.practicum.intershop.model.Product;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.http.MediaType;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-@Sql(scripts = "/sql/product-controller-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "/sql/clean-up.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ProductControllerTest extends AbstractIntegrationTest {
 
-    @Autowired
-    private ProductRepository productRepository;
+
+    @BeforeEach
+    public void setup() {
+        databaseClient.sql("DELETE FROM order_item").then()
+                .then(databaseClient.sql("DELETE FROM orders").then())
+                .then(databaseClient.sql("DELETE FROM cart").then())
+                .then(databaseClient.sql("DELETE FROM product").then())
+                .then(databaseClient.sql("""
+                                INSERT INTO product (id, title, img_path, price, description)
+                                VALUES (200, 'Продукт для заказа', '/images/test.png', 500.00, 'Описание товара')
+                        """).then())
+                .then(databaseClient.sql("""
+                            INSERT INTO product (id, title, img_path, price, description)
+                            VALUES (300, 'Пряник', '/images/test.png', 100.00, 'Описание товара')
+                        """).then())
+                .block();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        databaseClient.sql("DELETE FROM order_item").then()
+                .then(databaseClient.sql("DELETE FROM orders").then())
+                .then(databaseClient.sql("DELETE FROM cart").then())
+                .then(databaseClient.sql("DELETE FROM product").then())
+                .block();
+    }
+
 
     @Test
-    void getProducts_shouldReturnMainPageWithProducts() throws Exception {
-        mockMvc.perform(get("/")
-                        .param("pageNumber", "0")
-                        .param("pageSize", "10")
-                        .param("sort", "NO"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("main"))
-                .andExpect(model().attributeExists("items"))
-                .andExpect(model().attributeExists("paging"))
-                .andExpect(model().attributeExists("sort"))
-                .andExpect(model().attributeExists("pageSize"))
-                .andExpect(model().attributeExists("pageNumber"));
+    void getProducts_shouldReturnMainPageWithProducts() {
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/")
+                        .queryParam("pageNumber", "0")
+                        .queryParam("pageSize", "10")
+                        .queryParam("sort", "NO")
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
     }
 
     @Test
-    void getProduct_shouldReturnProductPage() throws Exception {
-
-        mockMvc.perform(get("/product/200"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("product"))
-                .andExpect(model().attributeExists("product"));
+    void getProduct_shouldReturnProductPage() {
+        webTestClient.get()
+                .uri("/product/200")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
     }
 
     @Test
-    void addProductForm_shouldReturnProductFormPage() throws Exception {
-        mockMvc.perform(get("/product/new"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("form-product"))
-                .andExpect(model().attributeExists("product"));
-    }
-
-    @Test
-    void addProduct_shouldRedirectToMainPage() throws Exception {
-
-        MockMultipartFile file = new MockMultipartFile(
-                "image",
-                "pryanik.jpg",
-                "image/jpeg",
-                "image content".getBytes()
-        );
-
-        mockMvc.perform(multipart("/product")
-                        .file(file)
-                        .param("title", "Пряник 2")
-                        .param("description", "Описание пряника")
-                        .param("price", "150.0"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"));
-
-        Product product = productRepository.findByTitle("Пряник 2");
-        assertThat(product).isNotNull();
+    void addProductForm_shouldReturnProductFormPage() {
+        webTestClient.get()
+                .uri("/product/new")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
     }
 }

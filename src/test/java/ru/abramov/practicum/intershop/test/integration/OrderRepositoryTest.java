@@ -2,7 +2,9 @@ package ru.abramov.practicum.intershop.test.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.jdbc.Sql;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.model.Order;
 import ru.abramov.practicum.intershop.model.OrderItem;
 import ru.abramov.practicum.intershop.model.Product;
@@ -12,9 +14,6 @@ import ru.abramov.practicum.intershop.repository.ProductRepository;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@Transactional
 public class OrderRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -30,26 +29,28 @@ public class OrderRepositoryTest extends AbstractIntegrationTest {
         product.setPrice(new BigDecimal("100.0"));
         product.setImgPath("image/path/to/pryanik.jpg");
         product.setDescription("Вкусный пряник");
-        productRepository.save(product);
 
-        OrderItem orderItem = new OrderItem();
-        orderItem.setProduct(product);
-        orderItem.setCount(2);
-        orderItem.setTotalSum(product.getPrice().multiply(new BigDecimal(orderItem.getCount())));
+        Mono<Product> savedProductMono = productRepository.save(product);
 
-        Order order = new Order();
-        order.setTotalSum(orderItem.getTotalSum());
-        order.setOrderItems(List.of(orderItem));
+        savedProductMono
+                .flatMap(savedProduct -> {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setProductId(savedProduct.getId());
+                    orderItem.setCount(2);
+                    orderItem.setTotalSum(savedProduct.getPrice().multiply(new BigDecimal(orderItem.getCount())));
 
-        orderItem.setOrder(order);
+                    Order order = new Order();
+                    order.setTotalSum(orderItem.getTotalSum());
+                    order.setOrderItems(List.of(orderItem));
 
-        Order savedOrder = orderRepository.save(order);
+                    orderItem.setOrderId(order.getId());
 
-        assertThat(savedOrder).isNotNull();
-        assertThat(savedOrder.getId()).isNotNull();
-        assertThat(savedOrder.getTotalSum()).isEqualTo(order.getTotalSum());
-        assertThat(savedOrder.getOrderItems()).hasSize(1);
-        assertThat(savedOrder.getOrderItems().getFirst().getProduct().getTitle()).isEqualTo("Пряник");
+                    return orderRepository.save(order)
+                            .flatMap(savedOrder -> orderRepository.findById(savedOrder.getId()));
+                })
+                .as(StepVerifier::create)
+                .expectNextMatches(savedOrder -> savedOrder.getTotalSum().equals(new BigDecimal("200.0")))
+                .verifyComplete();
     }
 
     @Test
@@ -59,34 +60,41 @@ public class OrderRepositoryTest extends AbstractIntegrationTest {
         product.setPrice(new BigDecimal("150.0"));
         product.setImgPath("image/path/to/pirog.jpg");
         product.setDescription("Вкусный пирог");
-        productRepository.save(product);
 
-        Order order1 = new Order();
-        order1.setTotalSum(new BigDecimal("150.0"));
-        OrderItem orderItem1 = new OrderItem();
-        orderItem1.setProduct(product);
-        orderItem1.setCount(1);
-        orderItem1.setTotalSum(new BigDecimal("150.0"));
-        order1.setOrderItems(List.of(orderItem1));
-        orderItem1.setOrder(order1);
+        // Сохраняем продукт
+        Mono<Product> savedProductMono = productRepository.save(product);
 
-        orderRepository.save(order1);
+        savedProductMono
+                .flatMap(savedProduct -> {
+                    Order order1 = new Order();
+                    order1.setTotalSum(new BigDecimal("150.0"));
+                    OrderItem orderItem1 = new OrderItem();
+                    orderItem1.setProductId(savedProduct.getId());
+                    orderItem1.setCount(1);
+                    orderItem1.setTotalSum(new BigDecimal("150.0"));
+                    order1.setOrderItems(List.of(orderItem1));
+                    orderItem1.setOrderId(order1.getId());
 
-        Order order2 = new Order();
-        order2.setTotalSum(new BigDecimal("300.0"));
-        OrderItem orderItem2 = new OrderItem();
-        orderItem2.setProduct(product);
-        orderItem2.setCount(2);
-        orderItem2.setTotalSum(new BigDecimal("300.0"));
-        order2.setOrderItems(List.of(orderItem2));
-        orderItem2.setOrder(order2);
+                    Order order2 = createOrder(savedProduct, new BigDecimal("300.0"));
 
-        orderRepository.save(order2);
+                    return orderRepository.save(order1)
+                            .then(orderRepository.save(order2));
+                })
+                .flatMap(savedOrder -> orderRepository.findTopByOrderByIdDesc())
+                .as(StepVerifier::create)
+                .expectNextMatches(latestOrder -> latestOrder.getTotalSum().equals(new BigDecimal("300.0")))
+                .verifyComplete();
+    }
 
-        Order latestOrder = orderRepository.findTopByOrderByIdDesc();
-
-        assertThat(latestOrder).isNotNull();
-        assertThat(latestOrder.getId()).isEqualTo(order2.getId());
-        assertThat(latestOrder.getTotalSum()).isEqualTo(order2.getTotalSum());
+    private Order createOrder(Product product, BigDecimal totalSum) {
+        Order order = new Order();
+        order.setTotalSum(totalSum);
+        OrderItem orderItem = new OrderItem();
+        orderItem.setProductId(product.getId());
+        orderItem.setCount(totalSum.intValue() / product.getPrice().intValue());
+        orderItem.setTotalSum(totalSum);
+        order.setOrderItems(List.of(orderItem));
+        orderItem.setOrderId(order.getId());
+        return order;
     }
 }

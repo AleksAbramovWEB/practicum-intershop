@@ -1,10 +1,11 @@
 package ru.abramov.practicum.intershop.test.integration;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.ProductRepository;
 
@@ -12,11 +13,29 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Transactional
 public class ProductRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @BeforeEach
+    public void setup() {
+        databaseClient.sql("DELETE FROM order_item").then()
+                .then(databaseClient.sql("DELETE FROM orders").then())
+                .then(databaseClient.sql("DELETE FROM cart").then())
+                .then(databaseClient.sql("DELETE FROM product").then())
+                .block();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        Mono.when(
+                databaseClient.sql("DELETE FROM cart").then(),
+                databaseClient.sql("DELETE FROM product").then(),
+                databaseClient.sql("DELETE FROM order_item").then(),
+                databaseClient.sql("DELETE FROM orders").then()
+        ).block();
+    }
 
     @Test
     void saveProduct_shouldSaveProduct() {
@@ -26,11 +45,15 @@ public class ProductRepositoryTest extends AbstractIntegrationTest {
         product.setPrice(new BigDecimal("100.0"));
         product.setImgPath("/image/path/to/pryanik.jpg");
 
-        Product savedProduct = productRepository.save(product);
+        Mono<Product> savedProductMono = productRepository.save(product);
 
-        assertThat(savedProduct).isNotNull();
-        assertThat(savedProduct.getId()).isNotNull();
-        assertThat(savedProduct.getTitle()).isEqualTo("Пряник");
+        StepVerifier.create(savedProductMono)
+                .assertNext(savedProduct -> {
+                    assertThat(savedProduct).isNotNull();
+                    assertThat(savedProduct.getId()).isNotNull();
+                    assertThat(savedProduct.getTitle()).isEqualTo("Пряник");
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -40,12 +63,17 @@ public class ProductRepositoryTest extends AbstractIntegrationTest {
         product.setDescription("Вкусный пряник");
         product.setPrice(new BigDecimal("100.0"));
         product.setImgPath("/image/path/to/pryanik.jpg");
-        productRepository.save(product);
 
-        Product foundProduct = productRepository.findByTitle("Пряник");
+        productRepository.save(product).block();
 
-        assertThat(foundProduct).isNotNull();
-        assertThat(foundProduct.getTitle()).isEqualTo("Пряник");
+        Mono<Product> foundProductMono = productRepository.findByTitle("Пряник");
+
+        StepVerifier.create(foundProductMono)
+                .assertNext(foundProduct -> {
+                    assertThat(foundProduct).isNotNull();
+                    assertThat(foundProduct.getTitle()).isEqualTo("Пряник");
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -55,20 +83,20 @@ public class ProductRepositoryTest extends AbstractIntegrationTest {
         product1.setDescription("Вкусный пряник");
         product1.setPrice(new BigDecimal("100.0"));
         product1.setImgPath("/image/path/to/pryanik.jpg");
-        productRepository.save(product1);
 
         Product product2 = new Product();
         product2.setTitle("Пирог");
         product2.setDescription("Вкусный пирог");
         product2.setPrice(new BigDecimal("120.0"));
         product2.setImgPath("/image/path/to/pirog.jpg");
-        productRepository.save(product2);
 
-        Page<Product> productsPage = productRepository.findByTitleContainingIgnoreCase("пря", Pageable.unpaged());
+        productRepository.save(product1).block();
+        productRepository.save(product2).block();
 
-        assertThat(productsPage).isNotNull();
-        assertThat(productsPage.getTotalElements()).isEqualTo(1);
-        assertThat(productsPage.getContent()).hasSize(1);
-        assertThat(productsPage.getContent().getFirst().getTitle()).isEqualTo("Пряник");
+        Mono<Long> countMono = productRepository.countByTitleContainingIgnoreCase("пря");
+
+        StepVerifier.create(countMono)
+                .assertNext(count -> assertThat(count).isEqualTo(1L))
+                .verifyComplete();
     }
 }

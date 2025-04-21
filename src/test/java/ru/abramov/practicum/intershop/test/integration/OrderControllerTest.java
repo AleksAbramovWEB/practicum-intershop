@@ -1,56 +1,97 @@
 package ru.abramov.practicum.intershop.test.integration;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.jdbc.Sql;
-import ru.abramov.practicum.intershop.model.Order;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.repository.OrderRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-@Sql(scripts = "/sql/order-controller-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "/sql/clean-up.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private OrderRepository orderRepository;
 
-    @Test
-    void getOrders_shouldReturnOrdersPageWithOrderList() throws Exception {
-        mockMvc.perform(get("/orders"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("orders"))
-                .andExpect(view().name("orders"));
+    @BeforeEach
+    public void setup() {
+        databaseClient.sql("DELETE FROM order_item").then()
+                .then(databaseClient.sql("DELETE FROM orders").then())
+                .then(databaseClient.sql("DELETE FROM cart").then())
+                .then(databaseClient.sql("DELETE FROM product").then())
+                .then(databaseClient.sql("""
+                INSERT INTO product (id, title, img_path, price, description)
+                VALUES (200, 'Продукт для заказа', '/images/test.png', 500.00, 'Описание товара')
+            """).then())
+                .then(databaseClient.sql("""
+                INSERT INTO cart (id, product_id)
+                VALUES (1000, 200)
+            """).then())
+                .then(databaseClient.sql("""
+                INSERT INTO orders (id, total_sum) 
+                VALUES (300, 1000.00)
+            """).then())
+                .then(databaseClient.sql("""
+                INSERT INTO order_item (id, order_id, product_id, count, total_sum)
+                VALUES (400, 300, 200, 2, 1000.00)
+            """).then())
+                .block();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        databaseClient.sql("DELETE FROM order_item").then()
+                .then(databaseClient.sql("DELETE FROM orders").then())
+                .then(databaseClient.sql("DELETE FROM cart").then())
+                .then(databaseClient.sql("DELETE FROM product").then())
+                .block();
     }
 
     @Test
-    void getOrder_shouldReturnOrderPageById() throws Exception {
-        mockMvc.perform(get("/order/300"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("order"))
-                .andExpect(view().name("order"));
+    void getOrders_shouldReturnOrdersPageWithOrderList() {
+        webTestClient.get()
+                .uri("/orders")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
     }
 
     @Test
-    void getOrder_withCreatedParam_shouldIncludeNewOrderAttribute() throws Exception {
-        mockMvc.perform(get("/order/300")
-                        .param("created", "300"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("order"))
-                .andExpect(model().attributeExists("newOrder"))
-                .andExpect(view().name("order"));
+    void getOrder_shouldReturnOrderPageById() {
+        webTestClient.get()
+                .uri("/order/300")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
     }
 
     @Test
-    void postOrder_shouldCreateNewOrderAndRedirectToIt() throws Exception {
-        mockMvc.perform(post("/order"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("/order/*?created=*"));
+    void getOrder_withCreatedParam_shouldIncludeNewOrderAttribute() {
+        webTestClient.get()
+                .uri("/order/300?created=300")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
+                .expectBody(String.class);
+    }
 
-        Order latest = orderRepository.findTopByOrderByIdDesc();
-        assertThat(latest).isNotNull();
+    @Test
+    void postOrder_shouldCreateNewOrderAndRedirectToIt() {
+        webTestClient.post()
+                .uri("/order")
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectHeader().valueMatches("Location", "/order/\\d+\\?created=\\d+");
+
+        StepVerifier.create(orderRepository.findTopByOrderByIdDesc())
+                .assertNext(order -> {
+                    assertThat(order).isNotNull();
+                    assertThat(order.getId()).isNotNull();
+                })
+                .verifyComplete();
     }
 }
