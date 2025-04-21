@@ -33,19 +33,19 @@ public class CartController {
                 });
     }
 
-    @PostMapping(value = "/product/{id}/cart", params = "action=plus")
+    @PostMapping(value = "/product/{id}/cart/plus")
     public Mono<String> plus(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
         return cartService.plus(id)
                 .thenReturn(redirect(referer));
     }
 
-    @PostMapping(value = "/product/{id}/cart", params = "action=minus")
+    @PostMapping(value = "/product/{id}/cart/minus")
     public Mono<String> minus(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
         return cartService.minus(id)
                 .thenReturn(redirect(referer));
     }
 
-    @PostMapping(value = "/product/{id}/cart",params = "action=delete")
+    @PostMapping(value = "/product/{id}/cart/delete")
     public Mono<String> delete(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
         return cartService.delete(id)
                 .thenReturn(redirect(referer));

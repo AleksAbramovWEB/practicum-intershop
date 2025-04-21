@@ -1,14 +1,15 @@
 package ru.abramov.practicum.intershop.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.model.Order;
 
-import java.util.List;
 
 public interface OrderService {
 
-    Order create();
+    Mono<Order> create();
 
-    List<Order> getOrderList();
+    Flux<Order> getOrderList();
 
-    Order getOrder(Long id);
+    Mono<Order> getOrder(Long id);
 }

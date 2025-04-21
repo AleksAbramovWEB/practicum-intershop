@@ -2,7 +2,6 @@ package ru.abramov.practicum.intershop.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.model.Cart;
@@ -23,7 +22,6 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
 
     @Override
-    @Transactional
     public Flux<Product> getProductsInCart() {
         return productRepository.findAllInCart();
     }
@@ -51,7 +49,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    @Transactional
     public Mono<Void> delete(Long productId) {
         return productService.getProduct(productId)
                 .map(Product::getId)

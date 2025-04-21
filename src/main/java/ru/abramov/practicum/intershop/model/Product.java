@@ -6,7 +6,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.annotation.Transient;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.codec.multipart.FilePart;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
@@ -36,5 +36,5 @@ public class Product {
     private Integer count = 0;
 
     @Transient
-    private MultipartFile image;
+    private FilePart image;
 }

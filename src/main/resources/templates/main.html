@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta charset="UTF-8">
     <title>Витрина товаров</title>
 </head>
 
@@ -43,9 +44,9 @@
                         </select>
                     </p>
                     <p>
-                        <button th:if="${paging.hasPrevious()}" name="pageNumber" th:value="${pageNumber - 1}">&lt;</button>
+                        <button th:if="${hasPrevious}" name="pageNumber" th:value="${pageNumber - 1}">&lt;</button>
                         <span th:text="${'Страница: '+ (pageNumber + 1)}"></span>
-                        <button th:if="${paging.hasNext()}" name="pageNumber" th:value="${pageNumber + 1}">&gt;</button>
+                        <button th:if="${hasNext}" name="pageNumber" th:value="${pageNumber + 1}">&gt;</button>
                     </p>
                 </form>
             </td>
@@ -73,10 +74,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <form th:action="${'/product/' + item.getId() + '/cart'}" method="post">
+                            <form th:if="${item.getCount() != 0}" th:action="${'/product/' + item.getId() + '/cart/minus'}" method="post">
                                 <button name="action" value="minus">-</button>
                                 <span th:text="${item.getCount()}"></span>
-                                <button name="action" value="plus">+</button>
+                            </form>
+                            <form th:action="${'/product/' + item.getId() + '/cart/plus'}" method="post">
+                                <button th:if="${item.getCount() != 0}" name="action" value="plus">+</button>
                                 <button name="action" value="plus" th:if="${item.getCount() == 0}" style="float:right;">В корзину</button>
                             </form>
                         </td>

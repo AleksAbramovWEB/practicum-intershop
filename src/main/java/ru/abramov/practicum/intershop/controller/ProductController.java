@@ -1,6 +1,7 @@
 package ru.abramov.practicum.intershop.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,19 +27,25 @@ public class ProductController {
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             Model model
     ) {
-        return productService.getProducts(search, sort, pageNumber, pageSize)
-                .collectList()
-                .map(products -> {
+        return productService.getProductsWithCount(search, sort, pageNumber, pageSize)
+                .map(page -> {
                     List<List<Product>> rows = new ArrayList<>();
-                    int size = 3;
-                    for (int i = 0; i < products.size(); i += size) {
-                        rows.add(products.subList(i, Math.min(i + size, products.size())));
+                    int rowSize = 3;
+
+                    for (int i = 0; i < page.getProducts().size(); i += rowSize) {
+                        rows.add(page.getProducts().subList(i, Math.min(i + rowSize, page.getProducts().size())));
                     }
+
+                    long totalElements = page.getTotalElements();
+
                     model.addAttribute("items", rows);
                     model.addAttribute("search", search);
                     model.addAttribute("sort", sort);
                     model.addAttribute("pageSize", pageSize);
                     model.addAttribute("pageNumber", pageNumber);
+                    model.addAttribute("hasPrevious", pageNumber > 0);
+                    model.addAttribute("hasNext", ((long) (pageNumber + 1) * pageSize) < totalElements);
+
                     return "main";
                 });
     }
@@ -58,7 +65,7 @@ public class ProductController {
         return Mono.just("form-product");
     }
 
-    @PostMapping("/product")
+    @PostMapping(value = "/product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<String> addProducts(@ModelAttribute Product product, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("product", product);

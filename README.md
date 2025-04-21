@@ -5,13 +5,13 @@
 ```
 UPLOAD_IMAGE_DIR=
 
-DB_URL=jdbc:postgresql:
+DB_URL=r2dbc:postgresql:
 DB_USERNAME=
 DB_PASSWORD=
 
 TEST_UPLOAD_IMAGE_DIR=
 
-TEST_DB_URL=jdbc:postgresql:
+TEST_DB_URL=r2dbc:postgresql:
 TEST_DB_USERNAME=
 TEST_DB_PASSWORD=
 

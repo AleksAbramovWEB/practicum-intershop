@@ -2,17 +2,18 @@ package ru.abramov.practicum.intershop.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Order;
 import ru.abramov.practicum.intershop.model.OrderItem;
-import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.repository.CartRepository;
+import ru.abramov.practicum.intershop.repository.OrderItemRepository;
 import ru.abramov.practicum.intershop.repository.OrderRepository;
 import ru.abramov.practicum.intershop.service.OrderService;
+import ru.abramov.practicum.intershop.service.ProductService;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -25,51 +26,91 @@ public class OrderServiceImpl implements OrderService {
 
     private final CartRepository cartRepository;
 
+    private final ProductService productService;
+
+    private final OrderItemRepository orderItemRepository;
+
     @Override
-    @Transactional
-    public Order create() {
+    public Mono<Order> create() {
+        return cartRepository.findAll()
+                .collectList()
+                .flatMap(carts -> {
+                    if (carts.isEmpty()) {
+                        return Mono.error(new IllegalStateException("Cannot create order because no cart has been found"));
+                    }
 
-        Map<Product, List<Cart>> productCartMap = cartRepository.findAll()
-                .stream()
-                .collect(Collectors.groupingBy(Cart::getProduct));
+                    Map<Long, Long> productCounts = carts.stream()
+                            .collect(Collectors.groupingBy(Cart::getProductId, Collectors.counting()));
 
-        if (productCartMap.isEmpty()) {
-            throw new IllegalStateException("Cannot create order because no cart has been found");
-        }
+                    Order order = new Order();
+                    order.setTotalSum(BigDecimal.ZERO);
 
-        List<OrderItem> orderItems = new ArrayList<>();
-        Order order = new Order();
+                    return orderRepository.save(order)
+                            .flatMap(savedOrder -> {
+                                List<Mono<OrderItem>> itemMonos = productCounts.entrySet().stream()
+                                        .map(entry -> {
+                                            Long productId = entry.getKey();
+                                            Long count = entry.getValue();
 
-        productCartMap.forEach((product, list) -> {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProduct(product);
+                                            return productService.getProduct(productId)
+                                                    .map(product -> {
+                                                        OrderItem item = new OrderItem();
+                                                        item.setOrderId(savedOrder.getId());
+                                                        item.setProductId(productId);
+                                                        item.setCount(count.intValue());
+                                                        item.setTotalSum(product.getPrice().multiply(BigDecimal.valueOf(count)));
+                                                        return item;
+                                                    });
+                                        })
+                                        .toList();
 
-            orderItem.setCount(list.size());
-            orderItem.setTotalSum(product.getPrice().multiply(BigDecimal.valueOf(list.size())));
-            orderItem.setOrder(order);
+                                return Flux.concat(itemMonos)
+                                        .collectList()
+                                        .flatMap(orderItems -> {
+                                            BigDecimal totalSum = orderItems.stream()
+                                                    .map(OrderItem::getTotalSum)
+                                                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            orderItems.add(orderItem);
-        });
+                                            savedOrder.setTotalSum(totalSum);
 
-        order.setOrderItems(orderItems);
-        order.setTotalSum(orderItems.stream()
-                .map(OrderItem::getTotalSum)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-        );
+                                            return orderItemRepository.saveAll(orderItems)
+                                                    .then(orderRepository.save(savedOrder));
+                                        });
+                            })
+                            .flatMap(savedOrder -> cartRepository.deleteAll().thenReturn(savedOrder));
+                });
+    }
 
-        cartRepository.deleteAll();
 
-        return orderRepository.save(order);
+    @Override
+    public Flux<Order> getOrderList() {
+        return orderRepository.findAll()
+                .flatMap(this::setOrderItemsWithProducts);
     }
 
     @Override
-    public List<Order> getOrderList() {
-        return orderRepository.findAll();
-    }
-
-    @Override
-    public Order getOrder(Long id) {
+    public Mono<Order> getOrder(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Order not found")))
+                .flatMap(this::setOrderItemsWithProducts);
+    }
+
+    private Mono<Order> setOrderItemsWithProducts(Order order) {
+        return orderItemRepository.findByOrderId(order.getId())
+                .collectList()
+                .flatMap(orderItems -> Flux.fromIterable(orderItems)
+                        .flatMap(orderItem ->
+                                productService.getProduct(orderItem.getProductId())
+                                        .map(product -> {
+                                            orderItem.setProduct(product);
+                                            return orderItem;
+                                        })
+                        )
+                        .collectList()
+                        .map(updatedOrderItems -> {
+                            order.setOrderItems(updatedOrderItems);
+                            return order;
+                        })
+                );
     }
 }

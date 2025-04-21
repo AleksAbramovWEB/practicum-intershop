@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.abramov.practicum.intershop.model.Order;
+import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.service.OrderService;
 
 @Controller
@@ -17,28 +17,30 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/orders")
-    public String orders(Model model) {
-
-        model.addAttribute("orders", orderService.getOrderList());
-
-        return "orders";
+    public Mono<String> orders(Model model) {
+        return orderService.getOrderList()
+                .collectList()
+                .map(orders -> {
+                    model.addAttribute("orders", orders);
+                    return "orders";
+                });
     }
 
     @GetMapping("/order/{id}")
-    public String order(Model model, @PathVariable Long id, @RequestParam(required = false) Long created) {
-
-        model.addAttribute("order", orderService.getOrder(id));
-
-        if (created != null && created.equals(id)) {
-            model.addAttribute("newOrder", created);
-        }
-        return "order";
+    public Mono<String> order(Model model, @PathVariable Long id, @RequestParam(required = false) Long created) {
+        return orderService.getOrder(id)
+                .map(order -> {
+                    model.addAttribute("order", order);
+                    if (created != null && created.equals(id)) {
+                        model.addAttribute("newOrder", created);
+                    }
+                    return "order";
+                });
     }
 
     @PostMapping("/order")
-    public String create() {
-        Order order = orderService.create();
-
-        return "redirect:/order/" + order.getId() + "?created=" + order.getId();
+    public Mono<String> create() {
+        return orderService.create()
+                .map(order -> "redirect:/order/" + order.getId() + "?created=" + order.getId());
     }
 }

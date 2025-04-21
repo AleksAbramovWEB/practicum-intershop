@@ -2,6 +2,7 @@ package ru.abramov.practicum.intershop.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 
@@ -27,4 +28,7 @@ public class OrderItem {
     @NotNull
     @Column("total_sum")
     private BigDecimal totalSum;
+
+    @Transient
+    private Product product;
 }
