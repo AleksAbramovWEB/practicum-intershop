@@ -39,4 +39,8 @@ public interface ProductRepository extends R2dbcRepository<Product, Long> {
     Flux<Product> findAllPaged(@Param("offset") long offset, @Param("limit") int limit);
 
     Mono<Product> findByTitle(String title);
+
+    @Query("SELECT p.*, c.count FROM product p " +
+            "INNER JOIN (SELECT product_id, count(*) as count FROM cart GROUP BY product_id) c on c.product_id = p.id ")
+    Flux<Product> findAllInCart();
 }

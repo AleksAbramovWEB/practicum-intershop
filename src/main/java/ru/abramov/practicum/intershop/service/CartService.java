@@ -1,15 +1,16 @@
 package ru.abramov.practicum.intershop.service;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.model.Product;
 
 public interface CartService {
 
     Flux<Product> getProductsInCart();
 
-    void minus(Long productId);
+    Mono<Void> minus(Long productId);
 
-    void plus(Long productId);
+    Mono<Void> plus(Long productId);
 
-    void delete(Long productId);
+    Mono<Void> delete(Long productId);
 }

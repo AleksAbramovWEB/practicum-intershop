@@ -21,10 +21,6 @@ public class ProductServiceImpl implements ProductService {
     public Flux<Product> getProducts(String search, String sort, int page, int size) {
         long offset = (long) page * size;
 
-        String dd = """ 
-                
-                """;
-
         if (search != null && !search.isBlank()) {
             return switch (sort.toUpperCase()) {
                 case "ALPHA" -> productRepository.searchByTitleAlpha(search, offset, size);
