@@ -2,7 +2,6 @@ package ru.abramov.practicum.intershop.test.integration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.model.Order;

@@ -16,6 +16,11 @@ TEST_DB_USERNAME=
 TEST_DB_PASSWORD=
 
 ```
+### ✅ Накатить миграции
+```bash
+chmod +x run.sh
+./migrate.sh
+```
 
 ### ✅ Сборка/старт приложения
 ```bash
