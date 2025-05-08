@@ -1,6 +1,7 @@
 package ru.abramov.practicum.pay.model;
 
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.lang.Nullable;
@@ -16,9 +17,9 @@ import jakarta.annotation.Generated;
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-05-08T15:44:49.285739+03:00[Europe/Moscow]", comments = "Generator version: 7.12.0")
 public class BalanceResponse {
 
-  private @Nullable Double balance;
+  private @Nullable BigDecimal balance;
 
-  public BalanceResponse balance(Double balance) {
+  public BalanceResponse balance(BigDecimal balance) {
     this.balance = balance;
     return this;
   }
@@ -30,11 +31,11 @@ public class BalanceResponse {
   
   @Schema(name = "balance", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
   @JsonProperty("balance")
-  public Double getBalance() {
+  public BigDecimal getBalance() {
     return balance;
   }
 
-  public void setBalance(Double balance) {
+  public void setBalance(BigDecimal balance) {
     this.balance = balance;
   }
 

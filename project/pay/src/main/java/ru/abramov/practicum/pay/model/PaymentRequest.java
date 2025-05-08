@@ -1,8 +1,10 @@
 package ru.abramov.practicum.pay.model;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.lang.Nullable;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import jakarta.annotation.Generated;
@@ -14,9 +16,11 @@ import jakarta.annotation.Generated;
 @Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2025-05-08T15:44:49.285739+03:00[Europe/Moscow]", comments = "Generator version: 7.12.0")
 public class PaymentRequest {
 
-  private @Nullable Double amount;
+  @NotNull(message = "Amount is required")
+  @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
+  private BigDecimal amount;
 
-  public PaymentRequest amount(Double amount) {
+  public PaymentRequest amount(BigDecimal amount) {
     this.amount = amount;
     return this;
   }
@@ -28,11 +32,11 @@ public class PaymentRequest {
   
   @Schema(name = "amount", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
   @JsonProperty("amount")
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return amount;
   }
 
-  public void setAmount(Double amount) {
+  public void setAmount(BigDecimal amount) {
     this.amount = amount;
   }
 

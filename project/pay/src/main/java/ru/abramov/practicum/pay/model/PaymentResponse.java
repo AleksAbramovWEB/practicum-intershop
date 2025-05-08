@@ -19,9 +19,8 @@ public class PaymentResponse {
 
   private @Nullable String message;
 
-  public PaymentResponse success(Boolean success) {
+  public PaymentResponse(Boolean success) {
     this.success = success;
-    return this;
   }
 
   /**
