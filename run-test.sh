@@ -5,4 +5,4 @@ set -e
 # shellcheck disable=SC2046
 export $(grep -v '^#' .env | xargs)
 
-./gradlew build test
+./gradlew project:pay:test
