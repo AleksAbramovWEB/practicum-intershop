@@ -9,5 +9,4 @@ public class PracticumIntershopApplication {
     public static void main(String[] args) {
         SpringApplication.run(PracticumIntershopApplication.class, args);
     }
-
 }

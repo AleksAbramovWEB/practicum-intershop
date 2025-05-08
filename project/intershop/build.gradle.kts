@@ -15,6 +15,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
     implementation("org.postgresql:postgresql")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 }
 
 tasks.bootJar {

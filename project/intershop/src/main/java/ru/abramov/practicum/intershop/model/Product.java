@@ -10,11 +10,12 @@ import org.springframework.http.codec.multipart.FilePart;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
 @Table("product")
-public class Product {
+public class Product implements Serializable {
 
     @Id
     private Long id;

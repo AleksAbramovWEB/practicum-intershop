@@ -1,6 +1,8 @@
 package ru.abramov.practicum.intershop.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,6 +21,7 @@ public class ProductServiceImpl implements ProductService {
     private final ImageService imageService;
 
     @Override
+    @Cacheable(value = "products", key = "#search + '_' + #sort + '_' + #page + '_' + #size")
     public Mono<ProductPage> getProductsWithCount(String search, String sort, int page, int size) {
         long offset = (long) page * size;
 
@@ -45,6 +48,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @CacheEvict(value = {"products", "product"}, allEntries = true)
     public Mono<Void> addProduct(Product product) {
         return imageService.save(product.getImage())
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Image is required")))
@@ -54,6 +58,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "product", key = "#id")
     public Mono<Product> getProduct(Long id) {
         return productRepository.findByIdWithCountCart(id)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")));
