@@ -22,6 +22,11 @@ chmod +x run.sh
 ./migrate.sh
 ```
 
+### ✅ Генерация сервиса платежей
+```bash
+./gradlew project:pay:openApiGenerate
+```
+
 ### ✅ Сборка/старт приложения
 ```bash
 chmod +x run.sh

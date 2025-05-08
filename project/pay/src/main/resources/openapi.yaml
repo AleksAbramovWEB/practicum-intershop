@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Payment Service API
+  version: 1.0.0
+servers:
+- url: http://localhost:8081
+paths:
+  /balance:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceResponse"
+          description: Баланс успешно получен
+      summary: Получение баланса
+      x-accepts:
+      - application/json
+  /pay:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentResponse"
+          description: Платёж успешен
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Недостаточно средств
+      summary: Выполнение платежа
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    BalanceResponse:
+      example:
+        balance: 0.8008281904610115
+      properties:
+        balance:
+          format: double
+          type: number
+      type: object
+    PaymentRequest:
+      example:
+        amount: 0.8008281904610115
+      properties:
+        amount:
+          format: double
+          type: number
+      type: object
+    PaymentResponse:
+      example:
+        success: true
+        message: message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      type: object
+    ErrorResponse:
+      example:
+        error: error
+      properties:
+        error:
+          type: string
+      type: object

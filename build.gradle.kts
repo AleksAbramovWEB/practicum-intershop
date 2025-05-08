@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.openapi.generator") version "7.12.0"
 }
 
 group = "ru.abramov.practicum"
@@ -15,6 +16,7 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "io.spring.dependency-management")
     apply(plugin = "org.springframework.boot")
+    apply(plugin = "org.openapi.generator")
 
     java {
         toolchain {
