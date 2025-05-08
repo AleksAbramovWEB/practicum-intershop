@@ -1,20 +1,11 @@
 package ru.abramov.practicum.pay;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import ru.abramov.practicum.pay.model.PaymentRequest;
 
 import java.math.BigDecimal;
 
-@SpringBootTest
-@AutoConfigureWebTestClient
-class PayApiControllerTest {
-
-    @Autowired
-    private WebTestClient webTestClient;
+class PayApiTest extends AbstractApiTest {
 
     @Test
     void payPost_shouldSucceed() {
