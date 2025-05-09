@@ -27,6 +27,11 @@ chmod +x run.sh
 ./gradlew project:pay:openApiGenerate
 ```
 
+### ✅ Генерация клиента платежей
+```bash
+./gradlew project:intershop:openApiGenerate
+```
+
 ### ✅ Сборка/старт приложения
 ```bash
 chmod +x run.sh

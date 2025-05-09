@@ -28,6 +28,31 @@ tasks.bootRun {
     mainClass.set("ru.abramov.practicum.intershop.PracticumIntershopApplication")
 }
 
+openApiGenerate {
+    generatorName.set("java")
+    inputSpec.set("$rootDir/project/pay/src/main/resources/openapi.yaml")
+    outputDir.set("$rootDir/project/intershop")
+    apiPackage.set("ru.abramov.practicum.intershop.client.pay.api")
+    invokerPackage.set("ru.abramov.practicum.intershop.client.pay.invoker")
+    modelPackage.set("ru.abramov.practicum.intershop.client.pay.domain")
+    configOptions.set(
+        mapOf(
+            "library" to "webclient",
+            "reactive" to "true",
+            "openApiNullable" to "false",
+            "useBeanValidation" to "true",
+            "performBeanValidation" to "true",
+            "generateApiDocumentation" to "false",
+            "generateModelDocumentation" to "false",
+            "generateApiTests" to "false",
+            "generateModelTests" to "false",
+            "skipDefaultInterface" to "true",
+            "generateSupportingFiles" to "false"
+        )
+    )
+}
+
+
 val postgresHost: String = System.getenv("POSTGRES_HOST") ?: ""
 val postgresPort: String = System.getenv("POSTGRES_PORT") ?: ""
 val postgresDb: String = System.getenv("POSTGRES_DB") ?: ""
