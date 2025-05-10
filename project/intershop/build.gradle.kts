@@ -19,6 +19,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
 }
 
+tasks.jar {
+    enabled = false
+}
+
 tasks.bootJar {
     archiveFileName = "app.jar"
     mainClass.set("ru.abramov.practicum.intershop.PracticumIntershopApplication")

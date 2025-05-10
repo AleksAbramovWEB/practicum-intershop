@@ -4,8 +4,12 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
 }
 
+tasks.jar {
+    enabled = false
+}
+
 tasks.bootJar {
-    archiveFileName = "app-pay.jar"
+    archiveFileName = "app.jar"
     mainClass.set("ru.abramov.practicum.pay.PayApplication")
 }
 
