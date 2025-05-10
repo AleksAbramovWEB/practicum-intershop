@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import reactor.core.publisher.Mono;
+import ru.abramov.practicum.intershop.client.pay.api.PayApi;
+import ru.abramov.practicum.intershop.client.pay.domain.BalanceResponse;
 import ru.abramov.practicum.intershop.service.CartService;
 
 import java.math.BigDecimal;
@@ -18,18 +20,28 @@ public class CartController {
 
     private final CartService cartService;
 
+    private final PayApi payApi;
+
     @GetMapping("/cart")
     public Mono<String> cart(Model model) {
         return cartService.getProductsInCart()
                 .collectList()
-                .map(products -> {
+                .flatMap(products -> {
                     BigDecimal total = products.stream()
                             .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getCount())))
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
                     model.addAttribute("items", products);
                     model.addAttribute("total", total);
-                    return "cart";
+
+                    return payApi.balanceGet()
+                            .mapNotNull(BalanceResponse::getBalance)
+                            .onErrorResume(ex -> Mono.justOrEmpty((BigDecimal) null))
+                            .map(balance -> {
+                                model.addAttribute("balance", balance);
+
+                                return "cart";
+                            });
                 });
     }
 

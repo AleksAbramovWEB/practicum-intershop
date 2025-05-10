@@ -13,6 +13,7 @@
 
 package ru.abramov.practicum.intershop.client.pay.domain;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,12 +29,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class PaymentRequest {
   public static final String JSON_PROPERTY_AMOUNT = "amount";
   @jakarta.annotation.Nullable
-  private Double amount;
+  private BigDecimal amount;
 
   public PaymentRequest() {
   }
 
-  public PaymentRequest amount(@jakarta.annotation.Nullable Double amount) {
+  public PaymentRequest amount(@jakarta.annotation.Nullable BigDecimal amount) {
     
     this.amount = amount;
     return this;
@@ -48,14 +49,14 @@ public class PaymentRequest {
   @JsonProperty(JSON_PROPERTY_AMOUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return amount;
   }
 
 
   @JsonProperty(JSON_PROPERTY_AMOUNT)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAmount(@jakarta.annotation.Nullable Double amount) {
+  public void setAmount(@jakarta.annotation.Nullable BigDecimal amount) {
     this.amount = amount;
   }
 

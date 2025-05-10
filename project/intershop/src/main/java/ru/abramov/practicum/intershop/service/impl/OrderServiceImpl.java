@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.abramov.practicum.intershop.client.pay.api.PayApi;
+import ru.abramov.practicum.intershop.client.pay.domain.PaymentRequest;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Order;
 import ru.abramov.practicum.intershop.model.OrderItem;
@@ -29,6 +31,8 @@ public class OrderServiceImpl implements OrderService {
     private final ProductService productService;
 
     private final OrderItemRepository orderItemRepository;
+
+    private final PayApi payApi;
 
     @Override
     public Mono<Order> create() {
@@ -76,6 +80,15 @@ public class OrderServiceImpl implements OrderService {
                                             return orderItemRepository.saveAll(orderItems)
                                                     .then(orderRepository.save(savedOrder));
                                         });
+                            })
+                            .flatMap(savedOrder -> {
+
+                                PaymentRequest paymentRequest = new PaymentRequest();
+
+                                paymentRequest.setAmount(savedOrder.getTotalSum());
+
+                                return payApi.payPost(paymentRequest)
+                                        .thenReturn(savedOrder);
                             })
                             .flatMap(savedOrder -> cartRepository.deleteAll().thenReturn(savedOrder));
                 });

@@ -53,12 +53,25 @@
         <td style="text-align:right">
             <b th:text="'Итого: '+${total}+' руб.'"></b>
         </td>
+        <td th:if="${balance}" style="text-align:left">
+            <b th:text="'Доступно средств: '+${balance}+' руб.'"></b>
+        </td>
     </tr>
-    <tr>
+    <tr th:if="${balance != null and balance >= total}">
         <td style="text-align:right">
             <form action="/order" method="post">
                 <button>Создать заказ</button>
             </form>
+        </td>
+    </tr>
+    <tr th:if="${balance == null}">
+        <td style="text-align:right">
+            Сервис платежей временно не доступен
+        </td>
+    </tr>
+    <tr th:if="${balance != null and balance < total}">
+        <td style="text-align:right">
+            Недостаточно средств
         </td>
     </tr>
 </table>

@@ -13,6 +13,7 @@
 
 package ru.abramov.practicum.intershop.client.pay.domain;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,12 +29,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class BalanceResponse {
   public static final String JSON_PROPERTY_BALANCE = "balance";
   @jakarta.annotation.Nullable
-  private Double balance;
+  private BigDecimal balance;
 
   public BalanceResponse() {
   }
 
-  public BalanceResponse balance(@jakarta.annotation.Nullable Double balance) {
+  public BalanceResponse balance(@jakarta.annotation.Nullable BigDecimal balance) {
     
     this.balance = balance;
     return this;
@@ -48,14 +49,14 @@ public class BalanceResponse {
   @JsonProperty(JSON_PROPERTY_BALANCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public Double getBalance() {
+  public BigDecimal getBalance() {
     return balance;
   }
 
 
   @JsonProperty(JSON_PROPERTY_BALANCE)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setBalance(@jakarta.annotation.Nullable Double balance) {
+  public void setBalance(@jakarta.annotation.Nullable BigDecimal balance) {
     this.balance = balance;
   }
 

@@ -22,14 +22,14 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-09T09:47:00.861209+03:00[Europe/Moscow]", comments = "Generator version: 7.12.0")
-public class DefaultApi {
+public class PayApi {
     private ApiClient apiClient;
 
-    public DefaultApi() {
+    public PayApi() {
         this(new ApiClient());
     }
 
-    public DefaultApi(ApiClient apiClient) {
+    public PayApi(ApiClient apiClient) {
         this.apiClient = apiClient;
     }
 
