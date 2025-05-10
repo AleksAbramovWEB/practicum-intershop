@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import ru.abramov.practicum.intershop.client.pay.api.PayApi;
 import ru.abramov.practicum.intershop.model.Cart;
 import ru.abramov.practicum.intershop.model.Order;
 import ru.abramov.practicum.intershop.model.OrderItem;
@@ -122,8 +123,8 @@ class OrderServiceUnitTest {
     static class Config {
         @Bean
         public OrderService orderService(OrderRepository orderRepository, CartRepository cartRepository,
-                                         ProductService productService, OrderItemRepository orderItemRepository) {
-            return new OrderServiceImpl(orderRepository, cartRepository, productService, orderItemRepository);
+                                         ProductService productService, OrderItemRepository orderItemRepository, PayApi payApi) {
+            return new OrderServiceImpl(orderRepository, cartRepository, productService, orderItemRepository, payApi);
         }
 
         @Bean
@@ -144,6 +145,11 @@ class OrderServiceUnitTest {
         @Bean
         public OrderItemRepository orderItemRepository() {
             return mock(OrderItemRepository.class);
+        }
+
+        @Bean
+        public PayApi payApi() {
+            return mock(PayApi.class);
         }
     }
 }
