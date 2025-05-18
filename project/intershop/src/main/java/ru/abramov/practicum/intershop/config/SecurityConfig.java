@@ -33,8 +33,6 @@ public class SecurityConfig {
                                 "/order/**",
                                 "/cart"
                         ).authenticated()
-                        .anyExchange()
-                        .authenticated()
                 )
                 .oauth2Login(withDefaults())
                 .build();
