@@ -34,14 +34,20 @@
                 <tr>
                     <td>
                         <form th:if="${item.getCount() != 0}" th:action="${'/product/' + item.getId() + '/cart/minus'}" method="post">
+                            <input th:if="${_csrf}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                             <button name="action" value="minus">-</button>
                             <span th:text="${item.getCount()}"></span>
                         </form>
                         <form th:action="${'/product/' + item.getId() + '/cart/plus'}" method="post">
+                            <input th:if="${_csrf}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                             <button th:if="${item.getCount() != 0}" name="action" value="plus">+</button>
                             <button name="action" value="plus" th:if="${item.getCount() == 0}" style="float:right;">В корзину</button>
                         </form>
                         <form th:action="${'/product/' + item.getId() + '/cart/delete'}" method="post">
+                            <input th:if="${_csrf}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                             <button name="action" value="delete" style="float:right;">&cross;</button>
                         </form>
                     </td>
@@ -60,6 +66,7 @@
     <tr th:if="${balance != null and balance >= total}">
         <td style="text-align:right">
             <form action="/order" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button>Создать заказ</button>
             </form>
         </td>

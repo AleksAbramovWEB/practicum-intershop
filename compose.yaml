@@ -45,6 +45,20 @@ services:
     ports:
       - "8081:8081"
 
+  keycloak:
+    image: keycloak/keycloak:26.2.4
+    container_name: keycloak_practicum_intershop
+    env_file:
+      - .env
+    ports:
+      - 8480:8080
+      - 8454:5005
+    volumes:
+      - keycloak_data:/opt/keycloak/data/import
+    command:
+      - start-dev
+
 volumes:
   postgres_data:
   redis_data:
+  keycloak_data:

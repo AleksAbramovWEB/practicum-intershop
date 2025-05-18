@@ -17,6 +17,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
 
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 }
 
 tasks.jar {
