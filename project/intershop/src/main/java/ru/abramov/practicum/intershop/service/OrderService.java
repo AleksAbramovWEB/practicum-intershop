@@ -7,9 +7,9 @@ import ru.abramov.practicum.intershop.model.Order;
 
 public interface OrderService {
 
-    Mono<Order> create();
+    Mono<Order> create(String userId);
 
-    Flux<Order> getOrderList();
+    Flux<Order> getOrderList(String userId);
 
     Mono<Order> getOrder(Long id);
 }

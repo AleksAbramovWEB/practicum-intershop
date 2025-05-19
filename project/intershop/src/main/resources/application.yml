@@ -37,6 +37,7 @@ spring:
 
   security:
     oauth2:
+      keycloak-url: http://${KC_HOSTNAME}:${KC_PORT}
       client:
         provider:
           keycloak:
@@ -45,6 +46,7 @@ spring:
             user-info-uri: http://${KC_HOSTNAME}:${KC_PORT}/realms/${OAUTH2_REALM}/protocol/openid-connect/userinfo
             user-name-attribute: sub
             jwk-set-uri: http://${KC_HOSTNAME}:${KC_PORT}/realms/${OAUTH2_REALM}/protocol/openid-connect/certs
+            issuer-uri: http://${KC_HOSTNAME}:${KC_PORT}/realms/${OAUTH2_REALM}
         registration:
           keycloak:
             authorizationGrantType: authorization_code

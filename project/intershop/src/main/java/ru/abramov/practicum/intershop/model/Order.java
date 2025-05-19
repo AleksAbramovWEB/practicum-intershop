@@ -22,6 +22,10 @@ public class Order {
     @Column("total_sum")
     private BigDecimal totalSum;
 
+    @NotNull
+    @Column("user_id")
+    private String userId;
+
     @Transient
     private List<OrderItem> orderItems = new ArrayList<>();
 }

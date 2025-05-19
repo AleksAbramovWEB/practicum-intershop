@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
+import ru.abramov.practicum.intershop.annotation.CurrentUserId;
 import ru.abramov.practicum.intershop.service.OrderService;
 
 @Controller
@@ -17,8 +18,8 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/orders")
-    public Mono<String> orders(Model model) {
-        return orderService.getOrderList()
+    public Mono<String> orders(Model model, @CurrentUserId String userId) {
+        return orderService.getOrderList(userId)
                 .collectList()
                 .map(orders -> {
                     model.addAttribute("orders", orders);
@@ -39,8 +40,8 @@ public class OrderController {
     }
 
     @PostMapping("/order")
-    public Mono<String> create() {
-        return orderService.create()
+    public Mono<String> create(@CurrentUserId String userId) {
+        return orderService.create(userId)
                 .map(order -> "redirect:/order/" + order.getId() + "?created=" + order.getId());
     }
 }

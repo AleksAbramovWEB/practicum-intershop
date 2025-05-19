@@ -1,6 +1,8 @@
 package ru.abramov.practicum.intershop.controller;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import reactor.core.publisher.Mono;
+import ru.abramov.practicum.intershop.annotation.CurrentUserId;
 import ru.abramov.practicum.intershop.client.pay.api.PayApi;
 import ru.abramov.practicum.intershop.client.pay.domain.BalanceResponse;
 import ru.abramov.practicum.intershop.service.CartService;
@@ -23,8 +26,8 @@ public class CartController {
     private final PayApi payApi;
 
     @GetMapping("/cart")
-    public Mono<String> cart(Model model) {
-        return cartService.getProductsInCart()
+    public Mono<String> cart(Model model, @CurrentUserId String userId) {
+        return cartService.getProductsInCart(userId)
                 .collectList()
                 .flatMap(products -> {
                     BigDecimal total = products.stream()
@@ -46,20 +49,21 @@ public class CartController {
     }
 
     @PostMapping(value = "/product/{id}/cart/plus")
-    public Mono<String> plus(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
-        return cartService.plus(id)
+    public Mono<String> plus(@PathVariable Long id, @CurrentUserId String userId, @RequestHeader(value = "Referer", required = false) String referer) {
+
+        return cartService.plus(id, userId)
                 .thenReturn(redirect(referer));
     }
 
     @PostMapping(value = "/product/{id}/cart/minus")
-    public Mono<String> minus(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
-        return cartService.minus(id)
+    public Mono<String> minus(@PathVariable Long id, @CurrentUserId String userId, @RequestHeader(value = "Referer", required = false) String referer) {
+        return cartService.minus(id, userId)
                 .thenReturn(redirect(referer));
     }
 
     @PostMapping(value = "/product/{id}/cart/delete")
-    public Mono<String> delete(@PathVariable Long id, @RequestHeader(value = "Referer", required = false) String referer) {
-        return cartService.delete(id)
+    public Mono<String> delete(@PathVariable Long id, @CurrentUserId String userId, @RequestHeader(value = "Referer", required = false) String referer) {
+        return cartService.delete(id, userId)
                 .thenReturn(redirect(referer));
     }
 

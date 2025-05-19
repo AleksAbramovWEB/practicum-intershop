@@ -35,8 +35,8 @@ public class OrderServiceImpl implements OrderService {
     private final PayApi payApi;
 
     @Override
-    public Mono<Order> create() {
-        return cartRepository.findAll()
+    public Mono<Order> create(String userId) {
+        return cartRepository.findAllByUserId(userId)
                 .collectList()
                 .flatMap(carts -> {
                     if (carts.isEmpty()) {
@@ -48,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
                     Order order = new Order();
                     order.setTotalSum(BigDecimal.ZERO);
+                    order.setUserId(userId);
 
                     return orderRepository.save(order)
                             .flatMap(savedOrder -> {
@@ -96,8 +97,8 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Flux<Order> getOrderList() {
-        return orderRepository.findAll()
+    public Flux<Order> getOrderList(String userId) {
+        return orderRepository.findAllByUserId(userId)
                 .flatMap(this::setOrderItemsWithProducts);
     }
 

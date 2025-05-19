@@ -7,14 +7,20 @@
 </head>
 
 <body>
-    <a href="/orders" style="float:right;">
+    <a th:if="${user_id}" href="/orders" style="float:right;">
         <b>ЗАКАЗЫ &cudarrr;</b>
     </a>
-    <a href="/cart" style="float:right;">
+    <a th:if="${user_id}" href="/cart" style="float:right;">
         <b>КОРЗИНА &cudarrr;</b>
     </a>
     <a href="/" style="float:right;">
         <b>ГЛАВНАЯ &cudarrr;</b>
+    </a>
+    <a th:if="${user_id == null}" th:href="${keycloak_uri}">
+        <b>Войти</b>
+    </a>
+    <a th:if="${user_id}" href="/logout">
+        <b>Выйти</b>
     </a>
     <div style="width:70%;margin-left:auto;margin-right:auto;">
         <p>

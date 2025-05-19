@@ -22,26 +22,27 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
 
     @Override
-    public Flux<Product> getProductsInCart() {
+    public Flux<Product> getProductsInCart(String userId) {
         return productRepository.findAllInCart();
     }
 
     @Override
-    public Mono<Void> minus(Long productId) {
+    public Mono<Void> minus(Long productId, String userId) {
         return productService.getProduct(productId)
                 .map(Product::getId)
-                .flatMapMany(cartRepository::findAllByProductId)
+                .flatMapMany( id -> cartRepository.findAllByProductIdAndUserId(id, userId))
                 .next()
                 .flatMap(cartRepository::delete)
                 .then();
     }
 
     @Override
-    public Mono<Void> plus(Long productId) {
+    public Mono<Void> plus(Long productId, String userId) {
         return productService.getProduct(productId)
                 .map(product -> {
                     Cart cart = new Cart();
                     cart.setProductId(product.getId());
+                    cart.setUserId(userId);
                     return cart;
                 })
                 .flatMap(cartRepository::save)
@@ -49,10 +50,10 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<Void> delete(Long productId) {
+    public Mono<Void> delete(Long productId, String userId) {
         return productService.getProduct(productId)
                 .map(Product::getId)
-                .flatMapMany(cartRepository::findAllByProductId)
+                .flatMapMany( id -> cartRepository.findAllByProductIdAndUserId(id, userId))
                 .flatMap(cartRepository::delete)
                 .then();
     }

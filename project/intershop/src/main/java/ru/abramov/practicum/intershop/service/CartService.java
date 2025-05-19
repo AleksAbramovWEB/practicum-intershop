@@ -6,11 +6,11 @@ import ru.abramov.practicum.intershop.model.Product;
 
 public interface CartService {
 
-    Flux<Product> getProductsInCart();
+    Flux<Product> getProductsInCart(String userId);
 
-    Mono<Void> minus(Long productId);
+    Mono<Void> minus(Long productId, String userId);
 
-    Mono<Void> plus(Long productId);
+    Mono<Void> plus(Long productId, String userId);
 
-    Mono<Void> delete(Long productId);
+    Mono<Void> delete(Long productId, String userId);
 }
