@@ -37,7 +37,6 @@ spring:
 
   security:
     oauth2:
-      keycloak-url: http://${KC_HOSTNAME}:${KC_PORT}
       client:
         provider:
           keycloak:
@@ -55,6 +54,12 @@ spring:
             client-secret: ${OAUTH2_INTERSHOP_CLIENT_SECRET}
             redirect-uri: '{baseUrl}/{action}/oauth2/code/{registrationId}'
             scope: openid, profile, email
+          keycloak-pay-client:
+            client-id: ${OAUTH2_PAY_CLIENT_ID}
+            client-secret: ${OAUTH2_PAY_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope: openid
+            provider: keycloak
 
 service:
   pay:

@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public interface AccountHandler {
 
-    Mono<BigDecimal> getBalance();
+    Mono<BigDecimal> getBalance(String userId);
 
-    Mono<Void> payment(BigDecimal amount);
+    Mono<Void> payment(String userId, BigDecimal amount);
 }

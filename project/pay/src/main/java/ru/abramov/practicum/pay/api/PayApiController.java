@@ -20,7 +20,7 @@ public class PayApiController implements PayApi {
 
     @Override
     public Mono<ResponseEntity<PaymentResponse>> payPost(Mono<PaymentRequest> paymentRequest, ServerWebExchange exchange) {
-        return paymentRequest.flatMap(request -> accountHandler.payment(request.getAmount())
+        return paymentRequest.flatMap(request -> accountHandler.payment(request.getUserId(), request.getAmount())
                 .thenReturn(ResponseEntity.ok(new PaymentResponse(Boolean.TRUE))));
     }
 }

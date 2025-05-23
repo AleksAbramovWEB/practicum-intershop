@@ -5,6 +5,8 @@
  */
 package ru.abramov.practicum.pay.api;
 
+import jakarta.validation.Valid;
+import ru.abramov.practicum.pay.model.BalanceRequest;
 import ru.abramov.practicum.pay.model.BalanceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,7 +50,8 @@ public interface BalanceApi {
     )
     
     default Mono<ResponseEntity<BalanceResponse>> balanceGet(
-        @Parameter(hidden = true) final ServerWebExchange exchange
+            @Parameter(name = "BalanceRequest", description = "", required = true) @Valid @RequestBody Mono<BalanceRequest> balanceRequest,
+            @Parameter(hidden = true) final ServerWebExchange exchange
     ) {
         Mono<Void> result = Mono.empty();
         exchange.getResponse().setStatusCode(HttpStatus.NOT_IMPLEMENTED);

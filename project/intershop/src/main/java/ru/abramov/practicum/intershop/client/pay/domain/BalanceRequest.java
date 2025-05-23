@@ -13,55 +13,33 @@
 
 package ru.abramov.practicum.intershop.client.pay.domain;
 
-import java.math.BigDecimal;
-import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 /**
- * PaymentRequest
+ * BalanceRequest
  */
 @JsonPropertyOrder({
-  PaymentRequest.JSON_PROPERTY_AMOUNT,
-  PaymentRequest.JSON_PROPERTY_USER_ID
+  BalanceRequest.JSON_PROPERTY_USER_ID
 })
 @jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-09T09:47:00.861209+03:00[Europe/Moscow]", comments = "Generator version: 7.12.0")
-public class PaymentRequest {
-  public static final String JSON_PROPERTY_AMOUNT = "amount";
-  @jakarta.annotation.Nullable
-  private BigDecimal amount;
+public class BalanceRequest {
 
   public static final String JSON_PROPERTY_USER_ID = "user_id";
   @jakarta.annotation.Nullable
   private String userId;
 
-  public PaymentRequest() {
+  public BalanceRequest() {
   }
 
-  public PaymentRequest amount(@jakarta.annotation.Nullable BigDecimal amount) {
-    
-    this.amount = amount;
-    return this;
-  }
-
-
-  public PaymentRequest userId(@jakarta.annotation.Nullable String userId) {
+  public BalanceRequest userId( @jakarta.annotation.Nullable String userId) {
 
     this.userId = userId;
     return this;
-  }
-
-  /**
-   * Get amount
-   * @return amount
-   */
-  @jakarta.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_AMOUNT)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public BigDecimal getAmount() {
-    return amount;
   }
 
   /**
@@ -79,15 +57,10 @@ public class PaymentRequest {
 
   @JsonProperty(JSON_PROPERTY_USER_ID)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setAmount(@jakarta.annotation.Nullable BigDecimal amount) {
-    this.amount = amount;
-  }
-
-  @JsonProperty(JSON_PROPERTY_USER_ID)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setUserId(@jakarta.annotation.Nullable String userId) {
     this.userId = userId;
   }
+
 
   @Override
   public boolean equals(Object o) {
@@ -97,20 +70,19 @@ public class PaymentRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PaymentRequest paymentRequest = (PaymentRequest) o;
-    return Objects.equals(this.amount, paymentRequest.amount) && Objects.equals(this.userId, paymentRequest.userId);
+    BalanceRequest paymentRequest = (BalanceRequest) o;
+    return Objects.equals(this.userId, paymentRequest.userId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(amount, userId);
+    return Objects.hash(userId);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class PaymentRequest {\n");
-    sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
     sb.append("    userId: ").append(toIndentedString(userId)).append("\n");
     sb.append("}");
     return sb.toString();

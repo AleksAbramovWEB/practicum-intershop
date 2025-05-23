@@ -1,6 +1,7 @@
 package ru.abramov.practicum.intershop.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -12,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import reactor.core.publisher.Mono;
 import ru.abramov.practicum.intershop.annotation.CurrentUserId;
 import ru.abramov.practicum.intershop.client.pay.api.PayApi;
+import ru.abramov.practicum.intershop.client.pay.domain.BalanceRequest;
 import ru.abramov.practicum.intershop.client.pay.domain.BalanceResponse;
 import ru.abramov.practicum.intershop.service.CartService;
 
 import java.math.BigDecimal;
 
+@Slf4j
 @Controller
 @AllArgsConstructor
 public class CartController {
@@ -37,12 +40,14 @@ public class CartController {
                     model.addAttribute("items", products);
                     model.addAttribute("total", total);
 
-                    return payApi.balanceGet()
+                    return payApi.balanceGet(new BalanceRequest().userId(userId))
                             .mapNotNull(BalanceResponse::getBalance)
-                            .onErrorResume(ex -> Mono.justOrEmpty((BigDecimal) null))
+                            .onErrorResume(ex -> {
+                                log.info("Ошибка при получении баланса: ", ex.getMessage(), ex);
+                                return Mono.justOrEmpty((BigDecimal) null);
+                            })
                             .map(balance -> {
                                 model.addAttribute("balance", balance);
-
                                 return "cart";
                             });
                 });

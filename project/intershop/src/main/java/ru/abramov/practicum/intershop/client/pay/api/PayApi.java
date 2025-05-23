@@ -1,5 +1,6 @@
 package ru.abramov.practicum.intershop.client.pay.api;
 
+import ru.abramov.practicum.intershop.client.pay.domain.BalanceRequest;
 import ru.abramov.practicum.intershop.client.pay.invoker.ApiClient;
 
 import ru.abramov.practicum.intershop.client.pay.domain.BalanceResponse;
@@ -49,8 +50,12 @@ public class PayApi {
      * @return BalanceResponse
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    private ResponseSpec balanceGetRequestCreation() throws WebClientResponseException {
-        Object postBody = null;
+    private ResponseSpec balanceGetRequestCreation(BalanceRequest balanceRequest) throws WebClientResponseException {
+        Object postBody = balanceRequest;
+        // verify the required parameter 'balanceRequest' is set
+        if (balanceRequest == null) {
+            throw new WebClientResponseException("Missing the required parameter 'balanceRequest' when calling balanceGet", HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
+        }
         // create path and map variables
         final Map<String, Object> pathParams = new HashMap<String, Object>();
 
@@ -79,9 +84,9 @@ public class PayApi {
      * @return BalanceResponse
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public Mono<BalanceResponse> balanceGet() throws WebClientResponseException {
+    public Mono<BalanceResponse> balanceGet(BalanceRequest balanceRequest) throws WebClientResponseException {
         ParameterizedTypeReference<BalanceResponse> localVarReturnType = new ParameterizedTypeReference<BalanceResponse>() {};
-        return balanceGetRequestCreation().bodyToMono(localVarReturnType);
+        return balanceGetRequestCreation(balanceRequest).bodyToMono(localVarReturnType);
     }
 
     /**
@@ -91,9 +96,9 @@ public class PayApi {
      * @return ResponseEntity&lt;BalanceResponse&gt;
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public Mono<ResponseEntity<BalanceResponse>> balanceGetWithHttpInfo() throws WebClientResponseException {
+    public Mono<ResponseEntity<BalanceResponse>> balanceGetWithHttpInfo(BalanceRequest balanceRequest) throws WebClientResponseException {
         ParameterizedTypeReference<BalanceResponse> localVarReturnType = new ParameterizedTypeReference<BalanceResponse>() {};
-        return balanceGetRequestCreation().toEntity(localVarReturnType);
+        return balanceGetRequestCreation(balanceRequest).toEntity(localVarReturnType);
     }
 
     /**
@@ -103,8 +108,8 @@ public class PayApi {
      * @return ResponseSpec
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public ResponseSpec balanceGetWithResponseSpec() throws WebClientResponseException {
-        return balanceGetRequestCreation();
+    public ResponseSpec balanceGetWithResponseSpec(BalanceRequest balanceRequest) throws WebClientResponseException {
+        return balanceGetRequestCreation(balanceRequest);
     }
 
     /**

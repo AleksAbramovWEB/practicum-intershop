@@ -13,9 +13,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 @ControllerAdvice
 public class SecurityControllerAdvice {
 
-    @Value("${spring.security.oauth2.keycloak-url}")
-    private String keycloakUri;
-
     @ModelAttribute
     Mono<CsrfToken> csrfToken(ServerWebExchange exchange) {
         Mono<CsrfToken> csrfToken = exchange.getAttribute(CsrfToken.class.getName());
@@ -41,6 +38,6 @@ public class SecurityControllerAdvice {
 
     @ModelAttribute("keycloak_uri")
     public Mono<String> keycloakUri() {
-        return Mono.just(keycloakUri);
+        return Mono.just("/oauth2/authorization/keycloak");
     }
 }

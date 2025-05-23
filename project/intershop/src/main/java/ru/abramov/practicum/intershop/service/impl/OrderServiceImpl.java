@@ -87,6 +87,7 @@ public class OrderServiceImpl implements OrderService {
                                 PaymentRequest paymentRequest = new PaymentRequest();
 
                                 paymentRequest.setAmount(savedOrder.getTotalSum());
+                                paymentRequest.setUserId(userId);
 
                                 return payApi.payPost(paymentRequest)
                                         .thenReturn(savedOrder);

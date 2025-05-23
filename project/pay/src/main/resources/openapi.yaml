@@ -44,6 +44,13 @@ paths:
       - application/json
 components:
   schemas:
+    BalanceRequest:
+      example:
+        user_id: '1212313213'
+      properties:
+        user_id:
+          type: string
+      type: object
     BalanceResponse:
       example:
         balance: 0.8008281904610115
@@ -54,11 +61,14 @@ components:
       type: object
     PaymentRequest:
       example:
-        amount: 0.8008281904610115
+        amount: 0.8008281904610115,
+        user_id: '1212313213'
       properties:
         amount:
           format: double
           type: number
+        user_id:
+          type: string
       type: object
     PaymentResponse:
       example:
