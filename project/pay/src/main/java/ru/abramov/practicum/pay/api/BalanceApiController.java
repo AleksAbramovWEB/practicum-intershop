@@ -19,13 +19,13 @@ public class BalanceApiController implements BalanceApi {
     private final AccountHandler accountHandler;
 
     @Override
-    public Mono<ResponseEntity<BalanceResponse>> balanceGet(Mono<BalanceRequest> balanceRequest, ServerWebExchange exchange) {
-        return balanceRequest.flatMap(request -> accountHandler.getBalance(request.getUserId())
+    public Mono<ResponseEntity<BalanceResponse>> balanceGet(String userId, ServerWebExchange exchange) {
+        return accountHandler.getBalance(userId)
                 .map(balance -> {
                     BalanceResponse balanceResponse = new BalanceResponse();
                     balanceResponse.setBalance(balance);
 
                     return ResponseEntity.ok(balanceResponse);
-                }));
+                });
     }
 }

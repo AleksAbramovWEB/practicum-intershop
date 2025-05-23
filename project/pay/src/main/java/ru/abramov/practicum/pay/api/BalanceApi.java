@@ -50,7 +50,7 @@ public interface BalanceApi {
     )
     
     default Mono<ResponseEntity<BalanceResponse>> balanceGet(
-            @Parameter(name = "BalanceRequest", description = "", required = true) @Valid @RequestBody Mono<BalanceRequest> balanceRequest,
+            @RequestParam("user_id") String userId,
             @Parameter(hidden = true) final ServerWebExchange exchange
     ) {
         Mono<Void> result = Mono.empty();

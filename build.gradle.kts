@@ -45,6 +45,8 @@ subprojects {
         }
         testImplementation("io.projectreactor:reactor-test")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+        testImplementation("org.springframework.security:spring-security-test")
     }
 
 

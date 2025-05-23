@@ -10,9 +10,11 @@ class PayApiTest extends AbstractApiTest {
     @Test
     void payPost_shouldSucceed() {
 
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .post()
                 .uri("/pay")
-                .bodyValue(new PaymentRequest().amount(BigDecimal.valueOf(50)))
+                .bodyValue(new PaymentRequest().amount(BigDecimal.valueOf(50))
+                        .userId("user-42"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -22,9 +24,11 @@ class PayApiTest extends AbstractApiTest {
     @Test
     void payPost_shouldReturnError_ifInsufficientFunds() {
 
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .post()
                 .uri("/pay")
-                .bodyValue(new PaymentRequest().amount(BigDecimal.valueOf(5000000000L)))
+                .bodyValue(new PaymentRequest().amount(BigDecimal.valueOf(5000000000L))
+                        .userId("user-42"))
                 .exchange()
                 .expectStatus()
                 .is4xxClientError();

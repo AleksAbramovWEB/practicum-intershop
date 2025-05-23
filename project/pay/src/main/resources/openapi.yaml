@@ -7,6 +7,12 @@ servers:
 paths:
   /balance:
     get:
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
       responses:
         "200":
           content:
