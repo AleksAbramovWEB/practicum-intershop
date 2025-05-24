@@ -37,7 +37,8 @@ public class ProductControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getProducts_shouldReturnMainPageWithProducts() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/")
                         .queryParam("pageNumber", "0")
@@ -52,7 +53,8 @@ public class ProductControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getProduct_shouldReturnProductPage() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/product/200")
                 .exchange()
                 .expectStatus().isOk()
@@ -62,7 +64,8 @@ public class ProductControllerTest extends AbstractIntegrationTest {
 
     @Test
     void addProductForm_shouldReturnProductFormPage() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/product/new")
                 .exchange()
                 .expectStatus().isOk()

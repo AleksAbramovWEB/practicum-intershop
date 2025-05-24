@@ -8,7 +8,6 @@ import ru.abramov.practicum.intershop.model.Cart;
 @Repository
 public interface CartRepository extends R2dbcRepository<Cart, Long> {
 
-    Flux<Cart> findAllByProductId(Long productId);
     Flux<Cart> findAllByProductIdAndUserId(Long productId, String userId);
     Flux<Cart> findAllByUserId(String userId);
 }

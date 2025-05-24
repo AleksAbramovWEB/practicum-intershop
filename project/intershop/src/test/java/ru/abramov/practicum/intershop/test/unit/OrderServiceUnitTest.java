@@ -28,6 +28,8 @@ import static org.mockito.Mockito.*;
 @SpringJUnitConfig(classes = OrderServiceUnitTest.Config.class)
 class OrderServiceUnitTest {
 
+    private final String userId = "user-42";
+
     @Autowired
     private OrderService orderService;
 
@@ -55,21 +57,21 @@ class OrderServiceUnitTest {
         Cart cart = new Cart();
         cart.setProductId(1L);
 
-        when(cartRepository.findAll()).thenReturn(Flux.just(cart, cart, cart));
+        when(cartRepository.findAllByUserId(userId)).thenReturn(Flux.just(cart, cart, cart));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(10L);
             return Mono.just(o);
         });
-        when(productService.getProduct(1L)).thenReturn(Mono.just(product));
+        when(productService.getProduct(1L, userId)).thenReturn(Mono.just(product));
         when(cartRepository.deleteAll()).thenReturn(Mono.empty());
     }
 
     @Test
     void create_ShouldThrow_WhenCartEmpty() {
-        when(cartRepository.findAll()).thenReturn(Flux.empty());
+        when(cartRepository.findAllByUserId(userId)).thenReturn(Flux.empty());
 
-        StepVerifier.create(orderService.create())
+        StepVerifier.create(orderService.create(userId))
                 .expectErrorMatches(err -> err instanceof IllegalStateException &&
                         err.getMessage().equals("Cannot create order because no cart has been found"))
                 .verify();
@@ -89,9 +91,9 @@ class OrderServiceUnitTest {
 
         when(orderRepository.findById(42L)).thenReturn(Mono.just(order));
         when(orderItemRepository.findByOrderId(42L)).thenReturn(Flux.just(item));
-        when(productService.getProduct(1L)).thenReturn(Mono.just(product));
+        when(productService.getProduct(1L, userId)).thenReturn(Mono.just(product));
 
-        StepVerifier.create(orderService.getOrder(42L))
+        StepVerifier.create(orderService.getOrder(42L, userId))
                 .expectNextMatches(o -> o.getOrderItems().size() == 1 &&
                         o.getOrderItems().get(0).getProduct().getId().equals(1L))
                 .verifyComplete();
@@ -109,11 +111,11 @@ class OrderServiceUnitTest {
         item.setCount(1);
         item.setTotalSum(BigDecimal.valueOf(100));
 
-        when(orderRepository.findAll()).thenReturn(Flux.just(order));
+        when(orderRepository.findAllByUserId(userId)).thenReturn(Flux.just(order));
         when(orderItemRepository.findByOrderId(11L)).thenReturn(Flux.just(item));
-        when(productService.getProduct(1L)).thenReturn(Mono.just(product));
+        when(productService.getProduct(1L, userId)).thenReturn(Mono.just(product));
 
-        StepVerifier.create(orderService.getOrderList())
+        StepVerifier.create(orderService.getOrderList(userId))
                 .expectNextMatches(o -> o.getOrderItems().size() == 1 &&
                         o.getOrderItems().get(0).getProduct().getId().equals(1L))
                 .verifyComplete();

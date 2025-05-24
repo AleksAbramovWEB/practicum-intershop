@@ -32,11 +32,13 @@ public class CartRepositoryTest extends AbstractIntegrationTest {
                     Long productId = savedProduct.getId();
                     Cart cart1 = new Cart();
                     cart1.setProductId(productId);
+                    cart1.setUserId(USER_ID);
                     Cart cart2 = new Cart();
                     cart2.setProductId(productId);
+                    cart2.setUserId(USER_ID);
 
                     return cartRepository.saveAll(Flux.just(cart1, cart2))
-                            .thenMany(cartRepository.findAllByProductId(productId));
+                            .thenMany(cartRepository.findAllByProductIdAndUserId(productId, USER_ID));
                 })
                 .as(StepVerifier::create)
                 .expectNextCount(2)
@@ -55,14 +57,16 @@ public class CartRepositoryTest extends AbstractIntegrationTest {
                 .flatMapMany(savedProduct -> {
                     Long productId = savedProduct.getId();
                     Cart cart1 = new Cart();
+                    cart1.setUserId(USER_ID);
                     cart1.setProductId(productId);
                     Cart cart2 = new Cart();
                     cart2.setProductId(productId);
+                    cart2.setUserId(USER_ID);
 
                     return cartRepository.saveAll(Flux.just(cart1, cart2))
-                            .thenMany(cartRepository.findAllByProductId(productId)
+                            .thenMany(cartRepository.findAllByProductIdAndUserId(productId, USER_ID)
                                     .flatMap(cartRepository::delete)
-                                    .thenMany(cartRepository.findAllByProductId(productId)));
+                                    .thenMany(cartRepository.findAllByProductIdAndUserId(productId, USER_ID)));
                 })
                 .as(StepVerifier::create)
                 .verifyComplete();

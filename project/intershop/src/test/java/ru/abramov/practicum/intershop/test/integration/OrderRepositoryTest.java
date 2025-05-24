@@ -41,6 +41,7 @@ public class OrderRepositoryTest extends AbstractIntegrationTest {
                     Order order = new Order();
                     order.setTotalSum(orderItem.getTotalSum());
                     order.setOrderItems(List.of(orderItem));
+                    order.setUserId(USER_ID);
 
                     orderItem.setOrderId(order.getId());
 
@@ -88,6 +89,7 @@ public class OrderRepositoryTest extends AbstractIntegrationTest {
     private Order createOrder(Product product, BigDecimal totalSum) {
         Order order = new Order();
         order.setTotalSum(totalSum);
+        order.setUserId(USER_ID);
         OrderItem orderItem = new OrderItem();
         orderItem.setProductId(product.getId());
         orderItem.setCount(totalSum.intValue() / product.getPrice().intValue());

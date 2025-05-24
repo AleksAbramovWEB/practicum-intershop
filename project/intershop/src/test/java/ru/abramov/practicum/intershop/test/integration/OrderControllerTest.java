@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.repository.OrderRepository;
 
@@ -26,12 +27,12 @@ public class OrderControllerTest extends AbstractIntegrationTest {
                 VALUES (200, 'Продукт для заказа', '/images/test.png', 500.00, 'Описание товара')
             """).then())
                 .then(databaseClient.sql("""
-                INSERT INTO cart (id, product_id)
-                VALUES (1000, 200)
+                INSERT INTO cart (id, product_id, user_id)
+                VALUES (1000, 200, 'user-42')
             """).then())
                 .then(databaseClient.sql("""
-                INSERT INTO orders (id, total_sum) 
-                VALUES (300, 1000.00)
+                INSERT INTO orders (id, total_sum, user_id) 
+                VALUES (300, 1000.00, 'user-42')
             """).then())
                 .then(databaseClient.sql("""
                 INSERT INTO order_item (id, order_id, product_id, count, total_sum)
@@ -51,7 +52,8 @@ public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getOrders_shouldReturnOrdersPageWithOrderList() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/orders")
                 .exchange()
                 .expectStatus().isOk()
@@ -61,7 +63,8 @@ public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getOrder_shouldReturnOrderPageById() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/order/300")
                 .exchange()
                 .expectStatus().isOk()
@@ -71,7 +74,8 @@ public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getOrder_withCreatedParam_shouldIncludeNewOrderAttribute() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/order/300?created=300")
                 .exchange()
                 .expectStatus().isOk()
@@ -81,7 +85,9 @@ public class OrderControllerTest extends AbstractIntegrationTest {
 
     @Test
     void postOrder_shouldCreateNewOrderAndRedirectToIt() {
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/order")
                 .exchange()
                 .expectStatus().is3xxRedirection()

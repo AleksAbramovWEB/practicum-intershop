@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import ru.abramov.practicum.intershop.repository.ProductRepository;
@@ -27,9 +28,9 @@ public class CartControllerTest extends AbstractIntegrationTest {
             VALUES (100, 'Тестовый товар', '/images/test.png', 150.00, 'Описание')
         """).then())
                 .then(databaseClient.sql("""
-            INSERT INTO cart (id, product_id)
-            VALUES (200, 100),
-                   (201, 100)
+            INSERT INTO cart (id, product_id, user_id)
+            VALUES (200, 100, 'user-42'),
+                   (201, 100, 'user-42')
         """).then())
                 .block();
     }
@@ -46,7 +47,8 @@ public class CartControllerTest extends AbstractIntegrationTest {
 
     @Test
     void getCart_shouldReturnCartPageWithItemsAndTotal() {
-        webTestClient.get()
+        webTestClient.mutateWith(getMockJwt())
+                .get()
                 .uri("/cart")
                 .exchange()
                 .expectStatus().isOk()
@@ -56,42 +58,48 @@ public class CartControllerTest extends AbstractIntegrationTest {
 
     @Test
     void postPlusAction_shouldIncrementProductCount() {
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/product/100/cart/plus")
                 .header("Referer", "/cart")
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", "/cart");
 
-        StepVerifier.create(productRepository.findByIdWithCountCart(100L))
+        StepVerifier.create(productRepository.findByIdWithCountCart(100L, USER_ID))
                 .assertNext(product -> assertThat(product.getCount()).isEqualTo(3))
                 .verifyComplete();
     }
 
     @Test
     void postMinusAction_shouldDecrementProductCount() {
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/product/100/cart/minus")
                 .header("Referer", "/cart")
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", "/cart");
 
-        StepVerifier.create(productRepository.findByIdWithCountCart(100L))
+        StepVerifier.create(productRepository.findByIdWithCountCart(100L, USER_ID))
                 .assertNext(product -> assertThat(product.getCount()).isEqualTo(1))
                 .verifyComplete();
     }
 
     @Test
     void postDeleteAction_shouldClearProductFromCart() {
-        webTestClient.post()
+        webTestClient.mutateWith(getMockJwt())
+                .mutateWith(SecurityMockServerConfigurers.csrf())
+                .post()
                 .uri("/product/100/cart/delete")
                 .header("Referer", "/cart")
                 .exchange()
                 .expectStatus().is3xxRedirection()
                 .expectHeader().valueEquals("Location", "/cart");
 
-        StepVerifier.create(productRepository.findByIdWithCountCart(100L))
+        StepVerifier.create(productRepository.findByIdWithCountCart(100L, USER_ID))
                 .assertNext(product -> assertThat(product.getCount()).isZero())
                 .verifyComplete();
     }

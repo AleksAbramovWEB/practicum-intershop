@@ -26,6 +26,8 @@ class CartServiceUnitTest {
 
     private final Long productId = 1L;
 
+    private final String userId = "user-42";
+
     private Product product;
 
     @Autowired
@@ -48,18 +50,18 @@ class CartServiceUnitTest {
         product.setPrice(new BigDecimal("100.00"));
         product.setImgPath("img.jpg");
 
-        when(productService.getProduct(productId)).thenReturn(Mono.just(product));
+        when(productService.getProduct(productId, userId)).thenReturn(Mono.just(product));
     }
 
     @Test
     void getProductsInCart_ShouldReturnFluxOfProducts() {
-        when(productRepository.findAllInCart()).thenReturn(Flux.just(product));
+        when(productRepository.findAllInCart(userId)).thenReturn(Flux.just(product));
 
-        StepVerifier.create(cartService.getProductsInCart())
+        StepVerifier.create(cartService.getProductsInCart(userId))
                 .expectNext(product)
                 .verifyComplete();
 
-        verify(productRepository, times(1)).findAllInCart();
+        verify(productRepository, times(1)).findAllInCart(userId);
     }
 
     @Test
@@ -68,10 +70,10 @@ class CartServiceUnitTest {
         cart.setId(42L);
         cart.setProductId(productId);
 
-        when(cartRepository.findAllByProductId(productId)).thenReturn(Flux.just(cart));
+        when(cartRepository.findAllByProductIdAndUserId(productId, userId)).thenReturn(Flux.just(cart));
         when(cartRepository.delete(cart)).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.minus(productId))
+        StepVerifier.create(cartService.minus(productId, userId))
                 .verifyComplete();
 
         verify(cartRepository).delete(cart);
@@ -81,7 +83,7 @@ class CartServiceUnitTest {
     void plus_ShouldSaveCartItem() {
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.plus(productId))
+        StepVerifier.create(cartService.plus(productId, userId))
                 .verifyComplete();
 
         verify(cartRepository, times(1)).save(any(Cart.class));
@@ -95,10 +97,10 @@ class CartServiceUnitTest {
         Cart cart2 = new Cart();
         cart2.setProductId(productId);
 
-        when(cartRepository.findAllByProductId(productId)).thenReturn(Flux.just(cart1, cart2));
+        when(cartRepository.findAllByProductIdAndUserId(productId, userId)).thenReturn(Flux.just(cart1, cart2));
         when(cartRepository.delete(any())).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.delete(productId))
+        StepVerifier.create(cartService.delete(productId, userId))
                 .verifyComplete();
 
         verify(cartRepository, times(2)).delete(any());

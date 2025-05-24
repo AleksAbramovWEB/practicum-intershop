@@ -34,6 +34,8 @@ class ProductServiceUnitTest {
 
     private Product product;
 
+    private final String userId = "user-42";
+
     @BeforeEach
     void setUp() {
         product = new Product();
@@ -44,33 +46,33 @@ class ProductServiceUnitTest {
 
         reset(productRepository, imageService);
 
-        when(productRepository.findByIdWithCountCart(1L)).thenReturn(Mono.just(product));
+        when(productRepository.findByIdWithCountCart(1L, userId)).thenReturn(Mono.just(product));
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
         when(imageService.save(any())).thenReturn(Mono.just("path/to/image"));
     }
 
     @Test
     void getProduct_ShouldReturnProduct_WhenProductExists() {
-        StepVerifier.create(productService.getProduct(1L))
+        StepVerifier.create(productService.getProduct(1L, userId))
                 .expectNextMatches(p ->
                         p.getId().equals(product.getId()) &&
                                 p.getTitle().equals(product.getTitle()))
                 .verifyComplete();
 
-        verify(productRepository, times(1)).findByIdWithCountCart(1L);
+        verify(productRepository, times(1)).findByIdWithCountCart(1L, userId);
     }
 
     @Test
     void getProduct_ShouldThrowException_WhenProductNotFound() {
-        when(productRepository.findByIdWithCountCart(1L)).thenReturn(Mono.empty());
+        when(productRepository.findByIdWithCountCart(1L, userId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(productService.getProduct(1L))
+        StepVerifier.create(productService.getProduct(1L, userId))
                 .expectErrorMatches(throwable ->
                         throwable instanceof IllegalArgumentException &&
                                 throwable.getMessage().equals("Product not found"))
                 .verify();
 
-        verify(productRepository, times(1)).findByIdWithCountCart(1L);
+        verify(productRepository, times(1)).findByIdWithCountCart(1L, userId);
     }
 
     @Test
