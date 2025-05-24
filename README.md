@@ -1,4 +1,4 @@
-## Сдача проектной работы седьмого спринта (На основе существующего проекта «Витрина интернет-магазина» нужно разработать RESTful-сервис платежей с помощью OpenAPI и использовать Redis в качестве кеша товаров.) 
+## Сдача проектной работы восьмого спринта 
 
 ### ✅  Устанавливаем переменное окружение в .env
 
@@ -24,6 +24,24 @@ TEST_POSTGRES_HOST=
 
 REDIS_HOST=
 REDIS_PORT=
+
+KC_HOSTNAME=
+KC_PORT=
+KC_HTTP_ENABLED=true
+KC_PROXY=edge
+KEYCLOAK_ADMIN=
+KEYCLOAK_ADMIN_PASSWORD=
+KC_DB=postgres
+KC_DB_USERNAME=
+KC_DB_PASSWORD=
+KC_DB_URL=jdbc:postgresql:
+
+OAUTH2_INTERSHOP_CLIENT_ID=
+OAUTH2_INTERSHOP_CLIENT_SECRET=
+OAUTH2_REALM=
+
+OAUTH2_PAY_CLIENT_ID=
+OAUTH2_PAY_CLIENT_SECRET=
 
 ```
 ### ✅ Накатить миграции
