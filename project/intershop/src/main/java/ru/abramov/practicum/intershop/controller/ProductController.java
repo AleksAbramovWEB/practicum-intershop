@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+import ru.abramov.practicum.intershop.annotation.CurrentUserId;
 import ru.abramov.practicum.intershop.model.Product;
 import ru.abramov.practicum.intershop.service.ProductService;
 
@@ -25,9 +26,10 @@ public class ProductController {
             @RequestParam(value = "sort", defaultValue = "NO") String sort,
             @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
-            Model model
+            Model model,
+            @CurrentUserId String userId
     ) {
-        return productService.getProductsWithCount(search, sort, pageNumber, pageSize)
+        return productService.getProductsWithCount(search, sort, pageNumber, pageSize, userId)
                 .map(page -> {
                     List<List<Product>> rows = new ArrayList<>();
                     int rowSize = 3;
@@ -51,8 +53,8 @@ public class ProductController {
     }
 
     @GetMapping("/product/{id}")
-    public Mono<String> getProduct(@PathVariable Long id, Model model) {
-        return productService.getProduct(id)
+    public Mono<String> getProduct(@PathVariable Long id, Model model, @CurrentUserId String userId) {
+        return productService.getProduct(id, userId)
                 .map(product -> {
                     model.addAttribute("product", product);
                     return "product";

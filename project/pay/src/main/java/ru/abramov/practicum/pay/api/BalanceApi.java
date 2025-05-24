@@ -5,8 +5,6 @@
  */
 package ru.abramov.practicum.pay.api;
 
-import jakarta.validation.Valid;
-import ru.abramov.practicum.pay.model.BalanceRequest;
 import ru.abramov.practicum.pay.model.BalanceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -57,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
                                             Long productId = entry.getKey();
                                             Long count = entry.getValue();
 
-                                            return productService.getProduct(productId)
+                                            return productService.getProduct(productId, userId)
                                                     .map(product -> {
                                                         OrderItem item = new OrderItem();
                                                         item.setOrderId(savedOrder.getId());
@@ -100,22 +100,22 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Flux<Order> getOrderList(String userId) {
         return orderRepository.findAllByUserId(userId)
-                .flatMap(this::setOrderItemsWithProducts);
+                .flatMap(order -> setOrderItemsWithProducts(order, userId));
     }
 
     @Override
-    public Mono<Order> getOrder(Long id) {
+    public Mono<Order> getOrder(Long id, String userId) {
         return orderRepository.findById(id)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Order not found")))
-                .flatMap(this::setOrderItemsWithProducts);
+                .flatMap(order -> setOrderItemsWithProducts(order, userId));
     }
 
-    private Mono<Order> setOrderItemsWithProducts(Order order) {
+    private Mono<Order> setOrderItemsWithProducts(Order order, String userId) {
         return orderItemRepository.findByOrderId(order.getId())
                 .collectList()
                 .flatMap(orderItems -> Flux.fromIterable(orderItems)
                         .flatMap(orderItem ->
-                                productService.getProduct(orderItem.getProductId())
+                                productService.getProduct(orderItem.getProductId(), userId)
                                         .map(product -> {
                                             orderItem.setProduct(product);
                                             return orderItem;

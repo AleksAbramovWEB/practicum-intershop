@@ -28,8 +28,8 @@ public class OrderController {
     }
 
     @GetMapping("/order/{id}")
-    public Mono<String> order(Model model, @PathVariable Long id, @RequestParam(required = false) Long created) {
-        return orderService.getOrder(id)
+    public Mono<String> order(Model model, @PathVariable Long id, @RequestParam(required = false) Long created, @CurrentUserId String userId) {
+        return orderService.getOrder(id, userId)
                 .map(order -> {
                     model.addAttribute("order", order);
                     if (created != null && created.equals(id)) {

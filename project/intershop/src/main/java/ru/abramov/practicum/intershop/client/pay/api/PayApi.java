@@ -1,6 +1,5 @@
 package ru.abramov.practicum.intershop.client.pay.api;
 
-import ru.abramov.practicum.intershop.client.pay.domain.BalanceRequest;
 import ru.abramov.practicum.intershop.client.pay.invoker.ApiClient;
 
 import ru.abramov.practicum.intershop.client.pay.domain.BalanceResponse;
@@ -50,16 +49,16 @@ public class PayApi {
      * @return BalanceResponse
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    private ResponseSpec balanceGetRequestCreation(BalanceRequest balanceRequest) throws WebClientResponseException {
-        Object postBody = balanceRequest;
-        // verify the required parameter 'balanceRequest' is set
-        if (balanceRequest == null) {
-            throw new WebClientResponseException("Missing the required parameter 'balanceRequest' when calling balanceGet", HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
-        }
+    private ResponseSpec balanceGetRequestCreation(String userId) throws WebClientResponseException {
+        Object postBody = null;
+
         // create path and map variables
         final Map<String, Object> pathParams = new HashMap<String, Object>();
 
         final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+
+        queryParams.add("user_id", userId);
+
         final HttpHeaders headerParams = new HttpHeaders();
         final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
         final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
@@ -84,9 +83,9 @@ public class PayApi {
      * @return BalanceResponse
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public Mono<BalanceResponse> balanceGet(BalanceRequest balanceRequest) throws WebClientResponseException {
+    public Mono<BalanceResponse> balanceGet(String userId) throws WebClientResponseException {
         ParameterizedTypeReference<BalanceResponse> localVarReturnType = new ParameterizedTypeReference<BalanceResponse>() {};
-        return balanceGetRequestCreation(balanceRequest).bodyToMono(localVarReturnType);
+        return balanceGetRequestCreation(userId).bodyToMono(localVarReturnType);
     }
 
     /**
@@ -96,9 +95,9 @@ public class PayApi {
      * @return ResponseEntity&lt;BalanceResponse&gt;
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public Mono<ResponseEntity<BalanceResponse>> balanceGetWithHttpInfo(BalanceRequest balanceRequest) throws WebClientResponseException {
+    public Mono<ResponseEntity<BalanceResponse>> balanceGetWithHttpInfo(String userId) throws WebClientResponseException {
         ParameterizedTypeReference<BalanceResponse> localVarReturnType = new ParameterizedTypeReference<BalanceResponse>() {};
-        return balanceGetRequestCreation(balanceRequest).toEntity(localVarReturnType);
+        return balanceGetRequestCreation(userId).toEntity(localVarReturnType);
     }
 
     /**
@@ -108,8 +107,8 @@ public class PayApi {
      * @return ResponseSpec
      * @throws WebClientResponseException if an error occurs while attempting to invoke the API
      */
-    public ResponseSpec balanceGetWithResponseSpec(BalanceRequest balanceRequest) throws WebClientResponseException {
-        return balanceGetRequestCreation(balanceRequest);
+    public ResponseSpec balanceGetWithResponseSpec(String userId) throws WebClientResponseException {
+        return balanceGetRequestCreation(userId);
     }
 
     /**

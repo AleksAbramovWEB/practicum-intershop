@@ -11,5 +11,5 @@ public interface OrderService {
 
     Flux<Order> getOrderList(String userId);
 
-    Mono<Order> getOrder(Long id);
+    Mono<Order> getOrder(Long id, String userId);
 }

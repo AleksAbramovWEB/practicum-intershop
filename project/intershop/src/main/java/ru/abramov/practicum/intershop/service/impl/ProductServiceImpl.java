@@ -22,7 +22,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Cacheable(value = "products", key = "#search + '_' + #sort + '_' + #page + '_' + #size")
-    public Mono<ProductPage> getProductsWithCount(String search, String sort, int page, int size) {
+    public Mono<ProductPage> getProductsWithCount(String search, String sort, int page, int size, String userId) {
         long offset = (long) page * size;
 
         Mono<Long> totalMono = (search != null && !search.isBlank())
@@ -31,16 +31,16 @@ public class ProductServiceImpl implements ProductService {
 
         Flux<Product> productFlux = switch (sort.toUpperCase()) {
             case "ALPHA" -> (search != null && !search.isBlank())
-                    ? productRepository.searchByTitleAlpha(search, offset, size)
-                    : productRepository.findAllAlpha(offset, size);
+                    ? productRepository.searchByTitleAlpha(search, offset, size, userId)
+                    : productRepository.findAllAlpha(offset, size, userId);
 
             case "PRICE" -> (search != null && !search.isBlank())
-                    ? productRepository.searchByTitlePrice(search, offset, size)
-                    : productRepository.findAllPrice(offset, size);
+                    ? productRepository.searchByTitlePrice(search, offset, size, userId)
+                    : productRepository.findAllPrice(offset, size, userId);
 
             default -> (search != null && !search.isBlank())
-                    ? productRepository.searchByTitleAlpha(search, offset, size)
-                    : productRepository.findAllPaged(offset, size);
+                    ? productRepository.searchByTitleAlpha(search, offset, size, userId)
+                    : productRepository.findAllPaged(offset, size, userId);
         };
 
         return Mono.zip(productFlux.collectList(), totalMono)
@@ -59,8 +59,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Cacheable(value = "product", key = "#id")
-    public Mono<Product> getProduct(Long id) {
-        return productRepository.findByIdWithCountCart(id)
+    public Mono<Product> getProduct(Long id, String userId) {
+        return productRepository.findByIdWithCountCart(id, userId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Product not found")));
     }
 }
